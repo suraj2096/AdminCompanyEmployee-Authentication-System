@@ -1,0 +1,66 @@
+<div class="d-flex justify-content-center align-items-center w-100 bg-info" style="height: 42.1vw;">
+    <div class="card  mh-100" style="width: 35vw;">
+        <div class="card-header text-center bg-success text-white text-uppercase font-weight-bold">
+          Register
+        </div>
+        <div class="card-body">
+            <form [formGroup]="RegisterFormData">
+             <div class="row col-12">
+                <div class="col-4">
+                  <label for="userName" class="text-bold">UserName</label>
+                </div>
+                <div class="col-8">
+                  <input class="form-control" type="text" placeholder="Enter your UserName" id="userName" formControlName="UserName" name="UserName" required minlength="3"/>
+                  <div *ngIf="RegisterFormData.get('UserName')?.hasError('required') && RegisterFormData.get('UserName')?.touched">
+                    <span class="text-danger">UserName is Required!!!</span>  
+                  </div>
+                  <div *ngIf="RegisterFormData.get('UserName')?.hasError('minlength') && RegisterFormData.get('UserName')?.touched">
+                    <span class="text-danger">UserName must be 3 characters long!!!</span>  
+                  </div>
+                </div>
+             </div>
+             <div class="row col-12 mt-3">
+                <div class="col-4">
+                  <label for="password" class="text-bold">Password</label>
+                </div>
+                <div class="col-8">
+                  <input class="form-control" type="password" placeholder="Enter your Password" id="password" formControlName="Password" name="Password" required/>
+                  <div *ngIf="RegisterFormData.get('Password')?.hasError('required') && RegisterFormData.get('Password')?.touched">
+                    <span class="text-danger">Password is required!!!</span>  
+                  </div>
+                  <div *ngIf="RegisterFormData.get('Password')?.hasError('pattern') && RegisterFormData.get('Password')?.touched">
+                    <span class="text-danger">Password must be greater than 8 and less than 15 and must contain small letters,capital letters,@ and some digits</span>  
+                  </div>
+                </div>
+             </div>
+             <div class="row col-12 mt-3">
+              <div class="col-4">
+                <label for="password" class="text-bold">Confirm Password</label>
+              </div>
+              <div class="col-8">
+                <input class="form-control" type="password" placeholder="Enter your Confirm Password" id="confirmpassword" formControlName="ConfirmPassword"  name="ConfirmPassword" required/>
+                <div *ngIf="RegisterFormData.get('ConfirmPassword')?.hasError('required') && RegisterFormData.get('ConfirmPassword')?.touched">
+                  <span class="text-danger">Confirm Password is required!!!</span>  
+                </div>
+                <div *ngIf="RegisterFormData.errors?.['mismatch'] && RegisterFormData.get('ConfirmPassword')?.dirty && RegisterFormData.get('ConfirmPassword')?.value != ''">
+                  <span class="text-danger">Password and Confirm Password not match!!!</span>
+                </div>
+              </div>
+           </div>
+             <div class="row col-12 mt-3">
+                <div class="col-4">
+                  <label for="role" class="text-bold">Role</label>
+                </div>
+                <div class="col-8">
+                  <input class="form-control" type="text" placeholder="Enter your Role" id="role" formControlName="Role" name="Role" required/>
+                  <div *ngIf="RegisterFormData.get('Role')?.hasError('required') && RegisterFormData.get('Role')?.touched">
+                    <span class="text-danger">Role is Required!!</span>  
+                  </div>
+                </div>
+             </div>
+            </form>
+          </div>
+          <div class="card-footer text-muted text-center">
+            <button type="submit" class="btn btn-outline-info" (click)="RegisterClick()">Register</button>
+          </div>    
+      </div>
