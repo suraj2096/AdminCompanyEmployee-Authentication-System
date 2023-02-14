@@ -1,4 +1,11 @@
-<div class="d-flex justify-content-center align-items-center w-100 bg-info" style="height: 42.1vw;">
+<div class="bg-info " style="height:42.1vw;position:relative;" >
+<div class="alert alert-danger w-100" role="alert" style="position: absolute;"*ngIf="DisplaySuccess==true && DisplayName=='danger'" >
+{{DisplayMessage}}
+</div>
+<div class="alert alert-success w-100" role="alert" style="position: absolute;"*ngIf='DisplaySuccess==true && DisplayName=="success"'>
+  {{DisplayMessage}}
+</div>  
+<div class="d-flex justify-content-center align-items-center w-100 " style="height: 40vw">
 <div class="card  mh-100" style="width: 35vw;">
     <div class="card-header text-center bg-success text-white text-uppercase font-weight-bold">
       Login
@@ -57,3 +64,4 @@
         <button type="submit" class="btn btn-outline-info" (click)="LoginClick()">Login</button>
       </div>    
   </div>
+</div>

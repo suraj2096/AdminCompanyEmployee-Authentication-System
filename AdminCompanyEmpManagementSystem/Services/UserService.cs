@@ -9,15 +9,17 @@ namespace AdminCompanyEmpManagementSystem.Services
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManagaer;
         private readonly IJwtManager _jwtManager;
         private readonly AppSettingJwt _appSettingJwt;
 
-        public UserService(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager,IJwtManager jwtManager,IOptions<AppSettingJwt> appSettingJwt)
+        public UserService(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager,IJwtManager jwtManager,IOptions<AppSettingJwt> appSettingJwt)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _jwtManager = jwtManager;
             _appSettingJwt = appSettingJwt.Value;
+            _roleManagaer = roleManager;
         }
 
 
@@ -66,6 +68,8 @@ namespace AdminCompanyEmpManagementSystem.Services
         public async Task<bool> RegisterUser(ApplicationUser userCredentials)
         {
             // create the user here 
+            // first check the role he gave is exist in the database or not
+            if (await _roleManagaer.FindByNameAsync(userCredentials.Role) == null) return false;
             var user = await _userManager.CreateAsync(userCredentials, userCredentials.PasswordHash);
             if (!user.Succeeded) return false;
             // here assign the role to the user

@@ -31,13 +31,13 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         public async Task<IActionResult> Login([FromBody] UserLoginDetail user)
         {
             // here we check user is not register directly come to login
-            if (await _userService.IsUnique(user.UserName)) return Ok(new { Message = "Please Register first then login!!!" });
+            if (await _userService.IsUnique(user.UserName)) return Ok(new {Status= 0, Message = "Please Register first then login!!!" });
 
             // here we will authenticatae the user.
             var userAuthorize = await _userService.AuthenticateUser(user.UserName, user.Password);
-            if (userAuthorize == null) return Unauthorized();
+            if (userAuthorize == null) return Ok(new { Status= -1,Message="Invalid Login Ceredentials!!!!"});
 
-            return Ok(new { Token = userAuthorize.Token, RefreshToken = userAuthorize.RefreshToken });
+            return Ok(new { Status= 1, Token = userAuthorize.Token, RefreshToken = userAuthorize.RefreshToken });
         }
         [HttpPost]
         [Route("Register")]
@@ -51,14 +51,14 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             ApplicationUserDetail.PasswordHash = userRegisterDetail.Password;
 
            // here we will check the user is already register or not.
-            if (!await _userService.IsUnique(userRegisterDetail.UserName)) return Ok(new { Message = "You are already register go to login" });
+            if (!await _userService.IsUnique(userRegisterDetail.UserName)) return Ok(new {Status=0, Message = "You are already register go to login" });
             
             // here we will register the user.
             var registerUser = await _userService.RegisterUser(ApplicationUserDetail);
 
             //  if user is register successfully or not then take decision accordingly.
             if (!registerUser) return StatusCode(StatusCodes.Status500InternalServerError);
-            return Ok(new { Message = "Register successfully!!!" });
+            return Ok(new { Status=1, Message = "Register successfully!!!" });
 
         }
         [Route("RefreshToken")]
