@@ -14,6 +14,7 @@ export class LoginComponent {
   DisplaySuccess:boolean = false;
   DisplayMessage:string = "";
   DisplayName:string="danger";
+  Navigator:boolean = false;
   constructor(private loginService:LoginService,private router:Router){
   this.LoginUserData = new FormGroup({
     name:new FormControl(this.UserName,[Validators.required,Validators.minLength(4)]),
@@ -34,9 +35,11 @@ export class LoginComponent {
      // console.log(data);
       this.DisplaySuccess=true;
       if(data.status == 1){
+        this.Navigator = true;
         this.DisplayName = "success"; 
         this.DisplayMessage = "Login Successfully!!!" 
         localStorage.setItem('data',JSON.stringify(data));
+        this.loginService.loginSuccess = true;
       }
       else{
         this.DisplayMessage = data.message;
@@ -48,8 +51,12 @@ export class LoginComponent {
       setTimeout(()=>{
         this.DisplaySuccess = false;
         this.DisplayName = "danger";
-        this.router.navigate(['/admin']);
-       },3000);
+        if(this.Navigator){
+          this.Navigator = false;
+          this.router.navigate(['/admin']);
+        }
+
+       },2000);
     });
    }
 }

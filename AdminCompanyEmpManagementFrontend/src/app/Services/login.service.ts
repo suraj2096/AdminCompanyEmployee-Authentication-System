@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LoginService{
+  loginSuccess:boolean = false;
   constructor(private httpClient:HttpClient) { 
   
   }

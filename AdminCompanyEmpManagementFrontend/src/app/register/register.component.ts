@@ -75,7 +75,7 @@ export class RegisterComponent {
         this.DisplaySuccess = false;
         this.DisplayName = "danger";
         this.router.navigate(['/login']);
-       },3000);
+       },2000);
       }
     })
   
