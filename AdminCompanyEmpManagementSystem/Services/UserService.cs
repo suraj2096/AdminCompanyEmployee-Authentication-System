@@ -64,12 +64,19 @@ namespace AdminCompanyEmpManagementSystem.Services
         }
         #endregion
         
-        #region  Register the user here
+        #region  Register the user here and also check here admin is already register or not means how much admin we create here we define.
         public async Task<bool> RegisterUser(ApplicationUser userCredentials)
         {
             // create the user here 
             // first check the role he gave is exist in the database or not
             if (await _roleManagaer.FindByNameAsync(userCredentials.Role) == null) return false;
+
+           /* if (userCredentials.Role == SD.Role_Admin)
+            {
+                var CheckAdmin = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
+                if (CheckAdmin.Count == 1) return false;
+            }*/
+
             var user = await _userManager.CreateAsync(userCredentials, userCredentials.PasswordHash);
             if (!user.Succeeded) return false;
             // here assign the role to the user

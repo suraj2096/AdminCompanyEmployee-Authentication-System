@@ -62,8 +62,14 @@
                   <label for="role" class="text-bold">Role</label>
                 </div>
                 <div class="col-8">
-                  <input class="form-control" type="text" placeholder="Enter your Role" id="role" formControlName="Role" name="Role" required/>
-                  <div *ngIf="RegisterFormData.get('Role')?.hasError('required') && RegisterFormData.get('Role')?.touched">
+                  <select class="form-control" name="Role"  (change)="SelectRoleChange($event)" formControlName="Role">
+                    <option disabled selected >Select your Role</option>
+                    <option *ngFor="let Role of DisplayRole" [value]="Role">
+                     {{Role}}
+                    </option>
+                  </select>
+                  <!-- <input class="form-control" type="text" placeholder="Enter your Role" id="role" formControlName="Role" name="Role" required/> -->
+                  <div *ngIf="RegisterFormData.get('Role')?.hasError('required') || RegisterFormData.get('Role')?.value=='Select your Role' && RegisterFormData.get('Role')?.touched">
                     <span class="text-danger">Role is Required!!</span>  
                   </div>
                 </div>

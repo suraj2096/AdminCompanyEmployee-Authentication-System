@@ -15,12 +15,13 @@ export class RegisterComponent {
  DisplaySuccess:boolean = false;
  DisplayName:string="danger";
  DisplayMessage:string ="";
+ DisplayRole=["Company","Employee"];
  constructor(private registerService:RegisterService,private router:Router){
    this.RegisterUserData = {
      UserName:"",
      Password:"",
      ConfirmPassword:"",
-     Role:""
+     Role:"Select your Role"
     };
     this.RegisterFormData  = new FormGroup({
       'UserName':new FormControl(this.RegisterUserData.UserName,[Validators.required,Validators.minLength(4),Validators.pattern(/^[a-zA-Z_]/)]),
@@ -35,34 +36,43 @@ export class RegisterComponent {
       }
     
   }
-
+ 
+  SelectRoleChange(event:any){
+     this.RegisterFormData.setValue({UserName:this.RegisterFormData.get('UserName')?.value,
+      Password:this.RegisterFormData.get('Password')?.value,ConfirmPassword:this.RegisterFormData.get('ConfirmPassword')?.value,
+      Role:event.target.value});
+  }
 
  // this is a regiter click method 
- RegisterClick(){
-     if(this.RegisterFormData.invalid){
+ RegisterClick(){   
+  if(this.RegisterFormData.invalid){
       this.RegisterFormData.get('UserName')?.markAsTouched();
       this.RegisterFormData.get('Password')?.markAsTouched();
       this.RegisterFormData.get('ConfirmPassword')?.markAsTouched();
       this.RegisterFormData.get('Role')?.markAsTouched();
+      return;
      }
      this.RegisterUserData.UserName = this.RegisterFormData.get('UserName')?.value;
      this.RegisterUserData.Password = this.RegisterFormData.get('Password')?.value;
      this.RegisterUserData.Role = this.RegisterFormData.get('Role')?.value;
+   
      // here we will call the register api .......
     this.registerService.create(this.RegisterUserData).subscribe({
       next:(data)=>{
         this.DisplaySuccess=true;
         if(data.status == 1){
           this.DisplayName = "success"; 
-          localStorage.setItem('data',JSON.stringify(data));
         }
           this.DisplayMessage = data.message; 
       },
       error:(err)=>{
        if(err.status == 500){
         this.DisplaySuccess = true;
-        this.DisplayMessage = "Something went wrong !!!!!";
-      setTimeout(()=>{
+        this.DisplayMessage = "You Choose the wrong Role";
+        setTimeout(()=>{
+        // this.RegisterFormData.setValue({UserName:this.RegisterUserData.UserName,
+        //   Password:this.RegisterUserData.Password,ConfirmPassword:this.RegisterUserData.Password,
+        // Role:this.DisplayRole[1]});
         this.DisplaySuccess = false;
         this.DisplayName = "danger";
        },3000);
