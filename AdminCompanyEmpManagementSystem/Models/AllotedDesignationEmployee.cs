@@ -5,7 +5,7 @@ namespace AdminCompanyEmpManagementSystem.Models
     public class AllotedDesignationEmployee
     {
         public int Id { get; set; }
-        public int name { get; set; }
+        public string Name { get; set; }
         public int DesignationId { get; set; }
         [ForeignKey("DesignationId")]
         public Designation Designation { get; set; }

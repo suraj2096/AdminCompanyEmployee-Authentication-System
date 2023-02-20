@@ -1,6 +1,8 @@
 using AdminCompanyEmpManagementSystem;
 using AdminCompanyEmpManagementSystem.DTOMapping;
 using AdminCompanyEmpManagementSystem.Identity;
+using AdminCompanyEmpManagementSystem.Repository;
+using AdminCompanyEmpManagementSystem.Repository.IRepository;
 using AdminCompanyEmpManagementSystem.Services;
 using AdminCompanyEmpManagementSystem.Services.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,6 +30,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 // here add owr custom services 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtManager, JwtManager>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
 // adding jwt configuration

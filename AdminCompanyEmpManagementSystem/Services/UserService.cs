@@ -2,6 +2,7 @@
 using AdminCompanyEmpManagementSystem.Services.IServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using System.Text;
 
 namespace AdminCompanyEmpManagementSystem.Services
 {
@@ -97,6 +98,20 @@ namespace AdminCompanyEmpManagementSystem.Services
             checkUserInDb.Role = userGetRole?.FirstOrDefault();
             return checkUserInDb;
         }
-#endregion
+        #endregion
+        #region this method generate password of length 10 
+        public string? GeneratePassword()
+        {
+            int length = 10; 
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@"; // Add any additional characters that you want to include in the random text
+            StringBuilder Password = new StringBuilder();
+            for (int i = 0; i < length; i++)
+            {
+                Password.Append(chars[random.Next(chars.Length)]);
+            }
+            return Password.ToString();
+        }
+        #endregion
     }
 }

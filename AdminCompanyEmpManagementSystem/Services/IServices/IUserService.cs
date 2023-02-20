@@ -9,5 +9,6 @@ namespace AdminCompanyEmpManagementSystem.Services.IServices
         Task<bool> RegisterUser(ApplicationUser userCredentials);
         Task<ApplicationUser?> AddOrUpdateUserRefreshToken(ApplicationUser user);
         Task<ApplicationUser?> CheckUserInDb(string userName);
+        public string? GeneratePassword();
     }
 }
