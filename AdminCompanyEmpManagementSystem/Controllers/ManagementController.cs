@@ -28,15 +28,17 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         public IActionResult GetAllCompnay()
         {
             // return Ok(_unitOfWork._companyRepository.GetAll());
-            ICollection<CompanyDTO> companyDesigantionDto = new List<CompanyDTO>();
+            List<CompanyDTO> companyDesigantionDto = new List<CompanyDTO>();
             var getAllCompany = _unitOfWork._companyRepository.GetAll();
-            CompanyDTO company = new CompanyDTO()
-            {
-                CompanyDesigantion = new List<CompanyDesignationDTO>()
-            };
+           
             for(int i=0;i<getAllCompany.Count;i++)
             {
+                CompanyDTO company = new CompanyDTO()
+                {
+                    CompanyDesigantion = new List<CompanyDesignationDTO>()
+                };
                 var getAllDesEmp = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == getAllCompany.ElementAt(i).Id, includeTables: "Designation");
+                company.Id = getAllCompany.ElementAt(i).Id;
                 company.Name = getAllCompany.ElementAt(i).Name;
                 company.Address = getAllCompany.ElementAt(i).Address;
                 company.GstNum = getAllCompany.ElementAt(i).GstNum;
@@ -52,9 +54,9 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                     companyDesigantion.Add(companyDesigantionDTO);
                 }
                 company.CompanyDesigantion.AddRange(companyDesigantion);
-                companyDesigantionDto.Append(company);
+                companyDesigantionDto.Add(company);
             }
-            return Ok(companyDesigantionDto.ToList());
+            return Ok(companyDesigantionDto);
         }
 
 

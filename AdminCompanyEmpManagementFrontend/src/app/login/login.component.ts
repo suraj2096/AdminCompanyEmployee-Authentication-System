@@ -53,7 +53,7 @@ export class LoginComponent {
         this.DisplayName = "danger";
         if(this.Navigator){
           this.Navigator = false;
-          this.router.navigate(['/admin']);
+          this.router.navigate(['/company']);
         }
 
        },2000);

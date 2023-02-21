@@ -8,7 +8,9 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { AdminComponent } from './admin/admin.component';
+import { CompanyComponent } from './company/company.component';
+import { EmployeeComponent } from './employee/employee.component';
+import { DataTablesModule } from 'angular-datatables';
 
 @NgModule({
   declarations: [
@@ -16,13 +18,15 @@ import { AdminComponent } from './admin/admin.component';
     NavbarComponent,
     LoginComponent,
     RegisterComponent,
-    AdminComponent
+    CompanyComponent,
+    EmployeeComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    DataTablesModule
 
   ],
   providers: [],
