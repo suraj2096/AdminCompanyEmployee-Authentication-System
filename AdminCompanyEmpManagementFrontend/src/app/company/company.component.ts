@@ -9,6 +9,8 @@ import { Subject } from 'rxjs';
 })
 export class CompanyComponent implements OnInit,OnDestroy {
   GetAllCompany:any;
+  GetCompanyDesignation:any;
+  CreateCompanyDesignation:[{}]=[{DesType:"",name:""}];
   dtOptions:DataTables.Settings = {};
 ngOnInit(): void {
   this.dtOptions = {
@@ -37,5 +39,14 @@ dtTrigger:Subject<any> = new Subject<any>();
           }
         
         )
+      }
+      getCompanyDesignatinOnClick(companyDesigantionList:any){
+       this.GetCompanyDesignation = companyDesigantionList;
+      }
+      AddMoreDesignation(){
+
+      }
+      RemoveDesignation(){
+        
       }
 }

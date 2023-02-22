@@ -44,7 +44,7 @@ export class RegisterComponent {
   }
 
  // this is a regiter click method 
- RegisterClick(){   
+ RegisterClick(){ debugger
   if(this.RegisterFormData.invalid){
       this.RegisterFormData.get('UserName')?.markAsTouched();
       this.RegisterFormData.get('Password')?.markAsTouched();
@@ -65,7 +65,7 @@ export class RegisterComponent {
         }
           this.DisplayMessage = data.message; 
       },
-      error:(err)=>{
+      error:(err)=>{debugger
        if(err.status == 500){
         this.DisplaySuccess = true;
         this.DisplayMessage = "You Choose the wrong Role";
@@ -81,7 +81,8 @@ export class RegisterComponent {
       },
       complete:()=>{
         this.RegisterFormData.reset("");
-      setTimeout(()=>{
+        alert(this.RegisterUserData.Role = this.RegisterFormData.get('Role')?.value);
+        setTimeout(()=>{
         this.DisplaySuccess = false;
         this.DisplayName = "danger";
         this.router.navigate(['/login']);
