@@ -104,13 +104,13 @@ namespace AdminCompanyEmpManagementSystem.Services
         {
             int length = 10; 
             Random random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@"; // Add any additional characters that you want to include in the random text
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // Add any additional characters that you want to include in the random text
             StringBuilder Password = new StringBuilder();
             for (int i = 0; i < length; i++)
             {
                 Password.Append(chars[random.Next(chars.Length)]);
             }
-            return Password.ToString();
+            return Password+"@".ToString();
         }
         #endregion
     }

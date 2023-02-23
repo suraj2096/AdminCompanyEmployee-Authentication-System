@@ -77,7 +77,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             }
             var companyDetail = _mapper.Map<Company>(companyDTO);
             // check if admin register the company then we first create the company register and login ceredentials
-            /*ApplicationUser user = new ApplicationUser()
+            ApplicationUser user = new ApplicationUser()
             {
                 UserName = companyDTO.Email,
                 PasswordHash = _userService.GeneratePassword(),
@@ -85,15 +85,17 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             };
             var registerCompany = await _userService.RegisterUser(user);
             companyDetail.ApplicationUserId = user.Id;
-            if (!_unitOfWork._adminCompanyRepository.Add(companyDetail))
+            if (!_unitOfWork._companyRepository.Add(companyDetail))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-*/
-            // create company here .
+            //---------------------
+            // this code is not required
+           /* // create company here .
             // and also check that if company register in asp.net user then we will here update his details by 
             // company user.
-            _unitOfWork._companyRepository.Add(companyDetail);
+            _unitOfWork._companyRepository.Add(companyDetail);*/
+           //------------------------------
             for (int i = 0; i < companyDTO.CompanyDesigantion?.Count(); i++)
             {
                 var designationExist = _unitOfWork._designationRepository.FirstOrDefault(filter: u => u.Name == companyDTO.CompanyDesigantion.ElementAt(i).DesignationType);
