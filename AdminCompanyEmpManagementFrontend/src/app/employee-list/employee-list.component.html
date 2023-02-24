@@ -1,1 +1,149 @@
-<p>employee-list works!</p>
+<div>
+    <div class="row ms-5 mt-3 me-5">
+      <div class="col-1 ms-1">
+     <button class="btn btn-danger text-white" (click)="BackToList()">Back</button>
+      </div>
+    <div class="col-5">
+      <h2 class="">Employee List</h2>
+    </div>
+    <div class="col-4 ">
+        <button class="btn btn-info float-end" data-bs-toggle="modal" data-bs-target="#CreateEmployee">+ New Employee</button>
+    </div>
+</div>
+
+<div class=" mt-4 w-100" >
+    <div class="w-75 m-auto">
+      <!-- datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" -->
+    <table  id="myTable" class="table table-striped table-bordered table-sm row-border hover ">
+   <thead class="table-success">
+      <tr>
+      <!-- <th class="text-center">Id</th> -->
+      <th class="text-center">Name</th>
+      <th class="text-center">Salary</th>
+      <th class="text-center">Address</th>
+      <th class="text-center">Phone Number</th>
+      <th class="text-center">Pan Number</th>
+      <th class="text-center">Account Number</th>
+      <th class="text-center">PF Number</th>
+       <th class="text-center">Action</th>
+  </tr>
+   </thead>
+   <tbody>
+      <tr *ngFor="let empList of empList">
+       <!-- <td>{{empList.id}}</td> -->
+       <td>{{empList.name}}</td>
+       <td>{{empList.salary}}</td>
+       <td>{{empList.address}}</td>
+       <td>{{empList.phoneNum}}</td>
+       <td>{{empList.panNum}}</td>
+       <td>{{empList.accountNum}}</td>
+       <td>{{empList.pfNum}}</td>
+       <td class="text-center">
+        <button class="btn btn-info ms-2" (click)="EditButtonSetData(empList)" data-bs-toggle="modal" data-bs-target="#CreateEmployee" >Edit</button>
+        <button class="btn btn-danger ms-2" (click)="DeleteEmployee(empList.id)">Delete</button>
+       </td>
+      </tr>
+   </tbody>
+    </table>
+    </div>
+  </div>
+  </div>
+
+<!--Create New Employee model is here .......................  -->
+<div class="modal" tabindex="-1" id="CreateEmployee">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h5 class="modal-title text-white">Create Employee</h5>
+        <button type="button"  class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="EmployeeErrorExist">
+         <p class="text-danger">{{displayCreateEmployeeError}}</p>
+        </div>
+        <form class="form-group" #myForm = "ngForm">
+         <div class="row pt-2">
+          <div class="col-3 offset-1">
+        <label>Name</label>
+          </div>
+          <div class="col-8">
+            <!-- [(ngModel)]="CreateCompany.Name" #name="ngModel" -->
+            <input type="text" [(ngModel)]="CreateEmployee.Name" #name="ngModel"  name="name" placeholder="Enter  Name" class="form-control" required/>
+            <p *ngIf="name.invalid && (name.dirty || name.touched)" class="text-danger m-0 p-0">Name is required</p>  
+        </div> 
+      </div>
+         <div class="row pt-3">
+          <div class="col-3 offset-1">
+        <label>Salary</label>
+          </div>
+          <div class="col-8">
+          <input type="text" [(ngModel)]="CreateEmployee.Salary" #Salary="ngModel"  name="text" placeholder="Enter Salary" class="form-control" required/>
+          <p *ngIf="Salary.invalid && (Salary.dirty || Salary.touched)" class="text-danger m-0 p-0">Salary is required</p>  
+        </div>
+         </div>
+         <div class="row mt-3">
+          <div class="col-3 offset-1">
+        <label>Address</label>
+          </div>
+          <div class="col-8">
+          <input type="text"  [(ngModel)]="CreateEmployee.Address" #Address="ngModel"   name="Address" placeholder="Enter Address" class="form-control" required/>
+          <p *ngIf="Address.invalid && (Address.dirty || Address.touched)" class="text-danger m-0 p-0">Address is required</p>  
+        </div>
+         </div>
+
+         <div class="row mt-3">
+          <div class="col-3 offset-1">
+        <label>Pan Number</label>
+          </div>
+          <div class="col-8">
+          <input type="text"  [(ngModel)]="CreateEmployee.PanNum" #PanNum="ngModel"  name="Pan Number" placeholder="Enter Pan Number" class="form-control" required/>
+          <p *ngIf="PanNum.invalid && (PanNum.dirty || PanNum.touched)" class="text-danger m-0 p-0">Pan Number is required</p>  
+        </div>
+         </div>
+
+         <div class="row mt-3">
+          <div class="col-3 offset-1">
+        <label>Account Number</label>
+          </div>
+          <div class="col-8">
+          <input type="text"  [(ngModel)]="CreateEmployee.AccountNum" #AccountNum="ngModel"  name="Account Number" placeholder="Enter Account Number" class="form-control" required/>
+          <p *ngIf="AccountNum.invalid && (AccountNum.dirty || AccountNum.touched)" class="text-danger m-0 p-0">Account Number is required</p>  
+        </div>
+         </div>
+
+         <div class="row mt-3">
+          <div class="col-3 offset-1">
+        <label>PF Number</label>
+          </div>
+          <div class="col-8">
+          <input type="text"  [(ngModel)]="CreateEmployee.PFNum" #PFNum="ngModel"  name="PF number" placeholder="Enter PF Number" class="form-control" required/>
+          <p *ngIf="PFNum.invalid && (PFNum.dirty || PFNum.touched)" class="text-danger m-0 p-0">PF number is required</p>  
+        </div>
+         </div>
+
+         <div class="row mt-3">
+          <div class="col-3 offset-1">
+        <label>Phone Number</label>
+          </div>
+          <div class="col-8">
+          <input type="text"  [(ngModel)]="CreateEmployee.PhoneNum" #PhoneNum="ngModel"  name="Phone Number" placeholder="Enter Phone Number" class="form-control" required/>
+          <p *ngIf="PhoneNum.invalid && (PhoneNum.dirty || PhoneNum.touched)" class="text-danger m-0 p-0">Phone Number is required</p>  
+        </div>
+         </div>
+
+
+
+        
+          
+         
+         
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button"   class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="SaveEmployee(myForm)" *ngIf="saveUpdatButton==false">Save changes</button>
+        <button type="button" class="btn btn-primary" (click)="EditEmployee(myForm)" *ngIf="saveUpdatButton">Update</button>
+      </div>
+    </div>
+  </div>
+</div>

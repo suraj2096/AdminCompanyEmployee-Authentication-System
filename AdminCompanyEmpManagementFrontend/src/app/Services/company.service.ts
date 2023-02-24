@@ -16,6 +16,9 @@ export class CompanyService {
   createCompany(companyData:Company):Observable<any>{
    return this.httpClient.post<Company>("https://localhost:7294/CreateCompany",companyData);
   }
+  updateCompany(companyData:Company):Observable<any>{
+    return this.httpClient.patch<Company>("https://localhost:7294/UpdateCompany",companyData);
+  }
   getCompanyEmployee(id:any):Observable<any>{
     return this.httpClient.get(`https://localhost:7294/api/Management/Company/Employee/${id}`);
   }

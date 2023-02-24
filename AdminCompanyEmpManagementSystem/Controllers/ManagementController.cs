@@ -145,8 +145,10 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                 {
                     var designationExist = _unitOfWork._designationRepository.FirstOrDefault(filter: u => u.Name == companyDTO.CompanyDesigantion.ElementAt(i).DesignationType);
                     var designationId = 0;
+                    bool CreateNewDesignation = false;
                     if (designationExist == null)
                     {
+                        CreateNewDesignation = true;
                         Designation designation = new Designation()
                         {
                             Name = companyDTO.CompanyDesigantion.ElementAt(i).DesignationType?.Trim().ToString() ?? "",
@@ -156,6 +158,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                         {
                             designationId = _unitOfWork._designationRepository.FirstOrDefault(u => u.Name == designation.Name)?.Id ?? 0;
                         }
+
                     }
                     // alloted the desigantion to the company senior employee.
                     AllotedDesignationEmployee allotedDesigEmployee = new AllotedDesignationEmployee()
@@ -164,7 +167,16 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                         CompanyId = companyDetail.Id, // static company id gave here we will work it later on.
                         DesignationId = designationId == 0 ? designationExist?.Id ?? 0 : designationId
                     };
+                    if (CreateNewDesignation)
+                    {
+                        _unitOfWork._allotedDesignationRepository.Add(allotedDesigEmployee);
+                        
+                    }
+                    else
+                    {
                     _unitOfWork._allotedDesignationRepository.Update(allotedDesigEmployee);
+
+                    }
                 }
             }
             return Ok(new { Status = 1, Message = "Updated Successfully" });

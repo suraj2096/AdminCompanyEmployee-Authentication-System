@@ -5,9 +5,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AdminCompanyEmpManagementSystem.Models.DTOs
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class EmployeeDTO : ControllerBase
+    
+    public class EmployeeDTO 
     {
         public int Id { get; set; }
         [Required]

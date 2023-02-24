@@ -30,7 +30,7 @@
      <td *ngIf="getCompany.companyDesigantion.length!=0" class="text-center"><button class="btn btn-success" (click)="getCompanyDesignatinOnClick(getCompany.companyDesigantion)" data-bs-toggle="modal" data-bs-target="#Designation">Show</button></td>
      <td *ngIf="getCompany.companyDesigantion.length == 0" class="text-center text-danger">No Record</td>
      <td class="text-center">
-      <button class="btn btn-info ms-2">Edit</button>
+      <button class="btn btn-info ms-2" (click)="EditCompanyOnclick(getCompany)" data-bs-toggle="modal" data-bs-target="#CreateCompany">Edit</button>
       <button class="btn btn-danger ms-2">Delete</button>
       <button class="btn btn-success ms-2" (click)="EmployeeList(getCompany.id)">Employee List</button>
      </td>
@@ -70,7 +70,7 @@
     </div>
   </div>
 </div>
-<!-- Here we will Create the company -->
+<!-- Here we will Create the company or update the company -->
 <div class="modal" tabindex="-1" id="CreateCompany">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -130,10 +130,10 @@
           <div *ngFor="let designationget of CreateCompanyDesignation;let indexOfElement=index;" class="row mt-2 ms-2">
           <div class="row">
             <div class="col-4">
-              <input type="text"  name="value{{indexOfElement}}" [(ngModel)]="CreateCompanyDesignation[indexOfElement].DesType"  placeholder="Designation" class="form-control"/>
+              <input type="text"  name="value{{CreateCompanyDesignation[indexOfElement].DesType}}" [(ngModel)]="CreateCompanyDesignation[indexOfElement].DesType"  placeholder="Designation" class="form-control"/>
             </div>
             <div class="col-5">
-              <input type="text"  name="value{{indexOfElement}}" [(ngModel)]="CreateCompanyDesignation[indexOfElement].Name"  placeholder="Name" class="form-control"/>
+              <input type="text"  name="value{{CreateCompanyDesignation[indexOfElement].Name}}" [(ngModel)]="CreateCompanyDesignation[indexOfElement].Name"  placeholder="Name" class="form-control"/>
             </div>
             <div class="col-1">
              <button class="btn btn-danger" (click)="RemoveDesignation(indexOfElement)" >Remove</button>
@@ -150,7 +150,8 @@
       </div>
       <div class="modal-footer">
         <button type="button"  (click)="ResetCancel()" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="SaveCompany(myForm)" >Save changes</button>
+        <button type="button" class="btn btn-primary" (click)="SaveCompany(myForm)" *ngIf="saveUpdatButton==false">Save changes</button>
+        <button type="button" class="btn btn-primary" (click)="UpdateCompany(myForm)" *ngIf="saveUpdatButton" >Update</button>
       </div>
     </div>
   </div>

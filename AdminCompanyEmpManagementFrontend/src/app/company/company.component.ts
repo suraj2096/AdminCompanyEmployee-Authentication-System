@@ -13,6 +13,7 @@ declare var window: any;
 })
 export class CompanyComponent implements OnInit,OnDestroy {
   formModal: any;
+  saveUpdatButton:boolean=false;
   dataTableRef:any;
   GetAllCompany:any;
   DesCheck:boolean = false;
@@ -126,13 +127,78 @@ dtTrigger:Subject<any> = new Subject<any>();
           })
          
       }
+
+
       EmployeeList(id:any){
         console.log(id);
         this.companyService.getCompanyEmployee(id).subscribe((data)=>{
-               console.log(data);
+           this.Router.navigate(['/employeelist'],{state:{data:data.data,cmpId:id}})
+
         },(err)=>{
            console.log(err);
         })
-        // this.Router.navigate(['/employeelist'],{state:{data:}})
+      }
+
+
+
+      // update the company details here
+      EditCompanyOnclick(getCompany:any){
+        this.CreateCompany.ID = getCompany.id;
+       this.CreateCompany.Name = getCompany.name;
+       this.CreateCompany.Address = getCompany.address;
+       this.CreateCompany.GstNum = getCompany.gstNum
+       this.CreateCompany.Email = getCompany.email;
+       this.CreateCompany.Email = getCompany.email;
+       this.CreateCompany.ApplicationUserId = getCompany.applicationUserId;
+       this.saveUpdatButton = true;
+       this.CreateCompany.CompanyDesigantion= getCompany.companyDesigantion;
+       this.CreateCompany.CompanyDesigantion.filter((data:any,index:any)=>{
+        this.CreateCompanyDesignation.push({DesType:data.designationType,Name:data.name});
+      });
+      console.log(this.CreateCompanyDesignation);
+      //  console.log(this.CreateCompanyDesignation);
+      }
+
+      // update employee --------------
+      UpdateCompany(form:any){
+        if(form.invalid){
+          form.control.markAllAsTouched();
+          return;
+        }
+        this.CreateCompanyDesignation.filter((data:any)=>{
+          if(data.DesType=="" && data.Name==""){
+            this.DesCheck = true;
+            data.Validate = "Enter the designation type and name of the person";
+          }
+          else if(data.Name == ""){
+            this.DesCheck = true;
+            data.Validate = `Enter the name of that designation on ${data.DesType}`;
+          }
+          else if(data.DesType==""){
+            this.DesCheck = true;
+            data.Validate = `Enter the designation of the person is ${data.Name}`;
+          }
+        });
+        if(this.DesCheck) return;
+        // here we will call the create company api when all validation above approved .
+        this.CreateCompanyDesignation.filter((data:any,index:any)=>{
+             this.CreateCompany.CompanyDesigantion[index]={DesignationType:data.DesType.toUpperCase(),Name:data.Name};
+        });
+      
+          
+          this.companyService.updateCompany(this.CreateCompany).subscribe({
+            next:(data)=>{
+            },
+            error:(err)=>{
+              console.log(err);
+            },
+            complete:()=>{
+              this.getCompanies();
+              this.dtTrigger.unsubscribe();
+              form.resetForm();
+              this.GetCompanyDesignation = [];
+              this.formModal.hide();
+            }
+          })
       }
 }
