@@ -44,6 +44,7 @@ namespace AdminCompanyEmpManagementSystem.Repository
         public void RemoveRange(IEnumerable<T> entity)
         {
             DbSet.RemoveRange(entity);
+            Save();
         }
         public T? Get(int id)
         {

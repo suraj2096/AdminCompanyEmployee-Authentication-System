@@ -1,10 +1,11 @@
-<div>
+<!-- this below design is for admin when admin come to the page then dispaly this html -->
+<div *ngIf="getRole=='Admin'">
     <div class="row ms-5 mt-3 me-5">
     <div class="col-8 ps-4">
       <h2 class="">Company List</h2>
     </div>
     <div class="col-4 ">
-        <button class="btn btn-info float-end" data-bs-toggle="modal" data-bs-target="#CreateCompany">+ New Company</button>
+        <button class="btn btn-info float-end" data-bs-toggle="modal" data-bs-target="#CreateCompany" (click)="addCompanyButton()">+ New Company</button>
     </div>
 </div>
 <div class=" mt-4 w-100" >
@@ -31,7 +32,7 @@
      <td *ngIf="getCompany.companyDesigantion.length == 0" class="text-center text-danger">No Record</td>
      <td class="text-center">
       <button class="btn btn-info ms-2" (click)="EditCompanyOnclick(getCompany)" data-bs-toggle="modal" data-bs-target="#CreateCompany">Edit</button>
-      <button class="btn btn-danger ms-2">Delete</button>
+      <button class="btn btn-danger ms-2" (click)="DeleteCompany(getCompany.id)">Delete</button>
       <button class="btn btn-success ms-2" (click)="EmployeeList(getCompany.id)">Employee List</button>
      </td>
     </tr>
@@ -40,6 +41,48 @@
   </div>
 </div>
 </div>
+<!-- this div will display when company come to the page then we will dispaly this html or page -->
+<div *ngIf="getRole=='Company'">
+  <div class="row ms-5 mt-3 me-5">
+    <div class="col-8 ps-4">
+      <h2 class="">Company Details</h2>
+    </div>
+</div>
+<div class=" mt-4 w-100" >
+  <div class="w-75 m-auto">
+    <!-- datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" -->
+  <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" id="myTable" class="table table-striped table-bordered table-sm row-border hover ">
+ <thead class="table-success">
+    <tr>
+    <th class="text-center">Id</th>
+    <th class="text-center">Name</th>
+    <th class="text-center">Address</th>
+    <th class="text-center">Gst Number</th>
+    <th class="text-center">Designation</th>
+    <th class="text-center">Action</th>
+</tr>
+ </thead>
+ <tbody>
+    <tr *ngFor="let getCompany of GetAllCompany">
+     <td>{{getCompany.id}}</td>
+     <td>{{getCompany.name}}</td>
+     <td>{{getCompany.address}}</td>
+     <td>{{getCompany.gstNum}}</td>
+     <td *ngIf="getCompany.companyDesigantion.length!=0" class="text-center"><button class="btn btn-success" (click)="getCompanyDesignatinOnClick(getCompany.companyDesigantion)" data-bs-toggle="modal" data-bs-target="#Designation">Show</button></td>
+     <td *ngIf="getCompany.companyDesigantion.length == 0" class="text-center text-danger">No Record</td>
+     <td class="text-center">
+      <button class="btn btn-info ms-2" (click)="EditCompanyOnclick(getCompany)" data-bs-toggle="modal" data-bs-target="#CreateCompany">Edit</button>
+      <button class="btn btn-success ms-2" (click)="EmployeeList(getCompany.id)">Employee List</button>
+     </td>
+    </tr>
+ </tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+
+
 <!-- here in this model we will display the company designation people -->
 <div class="modal " tabindex="-1" id="Designation">
   <div class="modal-dialog">
@@ -75,7 +118,8 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header bg-success">
-        <h5 class="modal-title text-white">Create Company</h5>
+        <h5 class="modal-title text-white" *ngIf="saveUpdatButton==false">Create Company</h5>
+        <h5 class="modal-title text-white" *ngIf="saveUpdatButton">Update Company</h5>
         <button type="button" (click)="ResetCancel()" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

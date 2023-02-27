@@ -7,7 +7,7 @@
       <h2 class="">Employee List</h2>
     </div>
     <div class="col-4 ">
-        <button class="btn btn-info float-end" data-bs-toggle="modal" data-bs-target="#CreateEmployee">+ New Employee</button>
+        <button class="btn btn-info float-end" data-bs-toggle="modal" data-bs-target="#CreateEmployee" (click)="addEmployee()">+ New Employee</button>
     </div>
 </div>
 
@@ -54,7 +54,8 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header bg-success">
-        <h5 class="modal-title text-white">Create Employee</h5>
+        <h5 class="modal-title text-white" *ngIf="saveUpdatButton==false">Create Employee</h5>
+        <h5 class="modal-title text-white" *ngIf="saveUpdatButton">Update Employee</h5>
         <button type="button"  class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -96,8 +97,8 @@
         <label>Pan Number</label>
           </div>
           <div class="col-8">
-          <input type="text"  [(ngModel)]="CreateEmployee.PanNum" #PanNum="ngModel"  name="Pan Number" placeholder="Enter Pan Number" class="form-control" required/>
-          <p *ngIf="PanNum.invalid && (PanNum.dirty || PanNum.touched)" class="text-danger m-0 p-0">Pan Number is required</p>  
+          <input type="text" disabled [value]="CreateEmployee.PanNum" name="Pan Number" title="you cannot enter the pan number " class="form-control" required/>
+          <!-- <p *ngIf="PanNum.invalid && (PanNum.dirty || PanNum.touched)" class="text-danger m-0 p-0">Pan Number is required</p>   -->
         </div>
          </div>
 
@@ -141,7 +142,7 @@
       </div>
       <div class="modal-footer">
         <button type="button"   class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="SaveEmployee(myForm)" *ngIf="saveUpdatButton==false">Save changes</button>
+        <button type="button" class="btn btn-primary" (click)="SaveEmployee(myForm)" *ngIf="saveUpdatButton==false" data-bs-dismiss="modal">Save changes</button>
         <button type="button" class="btn btn-primary" (click)="EditEmployee(myForm)" *ngIf="saveUpdatButton">Update</button>
       </div>
     </div>

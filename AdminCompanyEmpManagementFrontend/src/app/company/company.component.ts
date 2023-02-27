@@ -3,7 +3,6 @@ import { CompanyService } from '../Services/company.service';
 import { Subject } from 'rxjs';
 import { Company } from '../Models/company';
 import { Router } from '@angular/router';
-import { state } from '@angular/animations';
 
 declare var window: any;
 @Component({
@@ -13,6 +12,7 @@ declare var window: any;
 })
 export class CompanyComponent implements OnInit,OnDestroy {
   formModal: any;
+  getRole:any ;
   saveUpdatButton:boolean=false;
   dataTableRef:any;
   GetAllCompany:any;
@@ -26,7 +26,13 @@ ngOnInit(): void {
     responsive:true,
     pageLength:5
   };
-  this.getCompanies();
+  this.getRole =  JSON.parse(localStorage.getItem("data")??"").role;
+  if(this.getRole=="Admin"){
+    this.getCompanies();
+  }
+  else{
+    this.getCompany();
+  }
   this.CreateCompany = new Company();
 
   this.formModal = new window.bootstrap.Modal(
@@ -59,6 +65,17 @@ dtTrigger:Subject<any> = new Subject<any>();
         )
       }
 
+
+      // get company
+         getCompany(){
+
+         }
+
+
+
+
+
+
       // here is the function of onclick of show ....... in which we will dispaly particular
       // company reputed desigantion. 
       getCompanyDesignatinOnClick(companyDesigantionList:any){
@@ -82,6 +99,12 @@ dtTrigger:Subject<any> = new Subject<any>();
       // Close button par designation array koa reset
       ResetCancel(){
         this.CreateCompanyDesignation.splice(0,this.CreateCompanyDesignation.length);
+         this.CreateCompany = new Company();
+      }
+
+
+      addCompanyButton(){
+        this.saveUpdatButton = false;
       }
 
       // here we will save company function
@@ -155,12 +178,14 @@ dtTrigger:Subject<any> = new Subject<any>();
        this.CreateCompany.CompanyDesigantion.filter((data:any,index:any)=>{
         this.CreateCompanyDesignation.push({DesType:data.designationType,Name:data.name});
       });
-      console.log(this.CreateCompanyDesignation);
+      //console.log(this.CreateCompanyDesignation);
       //  console.log(this.CreateCompanyDesignation);
       }
 
       // update employee --------------
       UpdateCompany(form:any){
+        debugger
+        console.log(this.CreateCompanyDesignation);
         if(form.invalid){
           form.control.markAllAsTouched();
           return;
@@ -180,12 +205,14 @@ dtTrigger:Subject<any> = new Subject<any>();
           }
         });
         if(this.DesCheck) return;
-        // here we will call the create company api when all validation above approved .
-        this.CreateCompanyDesignation.filter((data:any,index:any)=>{
+        // here we will call the create company api when all validation above approved 
+        this.CreateCompany.CompanyDesigantion=[];
+        
+        this.CreateCompanyDesignation.map((data:any,index:any)=>{
              this.CreateCompany.CompanyDesigantion[index]={DesignationType:data.DesType.toUpperCase(),Name:data.Name};
         });
-      
-          
+      console.log(this.CreateCompany.CompanyDesigantion);
+          console.log(this.CreateCompanyDesignation);
           this.companyService.updateCompany(this.CreateCompany).subscribe({
             next:(data)=>{
             },
@@ -200,5 +227,17 @@ dtTrigger:Subject<any> = new Subject<any>();
               this.formModal.hide();
             }
           })
+      }
+
+      //delete Company---------------------
+      DeleteCompany(id:any){
+        this.companyService.deleteCompany(id).subscribe({
+          next:()=>{},
+          error:()=>{},
+          complete:()=>{
+            this.getCompanies();
+            this.dtTrigger.unsubscribe();       
+          }
+        })
       }
 }

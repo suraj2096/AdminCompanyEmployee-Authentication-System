@@ -3,7 +3,7 @@ export class Employee {
     Name:any;
     Salary:any;
     Address:any;
-    PanNum:any; 
+    PanNum:any=""; 
     AccountNum:any;
     PFNum:any; 
     PhoneNum :any;

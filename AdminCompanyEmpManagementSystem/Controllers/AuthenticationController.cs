@@ -37,7 +37,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             var userAuthorize = await _userService.AuthenticateUser(user.UserName, user.Password);
             if (userAuthorize == null) return Ok(new { Status= -1,Message="Invalid Login Ceredentials!!!!"});
 
-            return Ok(new { Status= 1, Token = userAuthorize.Token, RefreshToken = userAuthorize.RefreshToken });
+            return Ok(new { Status= 1, Token = userAuthorize.Token, RefreshToken = userAuthorize.RefreshToken,Role = userAuthorize.Role });
         }
         [HttpPost]
         [Route("Register")]

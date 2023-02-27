@@ -26,7 +26,13 @@ export class EmployeeListComponent implements OnInit {
     );
   }
   constructor(private employeeService:EmployeeService,private location:Location,private companyService:CompanyService){}
+  
+  addEmployee():void{
+    this.saveUpdatButton = false;
+  }
+  
   SaveEmployee(form:any){
+    
     if(form.invalid){
       form.control.markAllAsTouched();
       return;
@@ -40,6 +46,7 @@ export class EmployeeListComponent implements OnInit {
     this.employeeService.createEmployee(this.CreateEmployee).subscribe({
       next:(data)=>{
         console.log(data);
+        
       },
       error:(err)=>{
          if(err.status == 400){
@@ -52,7 +59,7 @@ export class EmployeeListComponent implements OnInit {
       },
       complete:()=>{
         this.formModal.hide;
-        this.companyService.getCompanyEmployee(this.empList[0].companyId).subscribe(
+        this.companyService.getCompanyEmployee(history.state.cmpId).subscribe(
           (data)=>{
             this.empList = data.data;
             

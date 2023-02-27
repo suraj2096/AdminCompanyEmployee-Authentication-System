@@ -5,7 +5,9 @@ using AdminCompanyEmpManagementSystem.Repository.IRepository;
 using AdminCompanyEmpManagementSystem.Services.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AdminCompanyEmpManagementSystem.Controllers
 {
@@ -16,11 +18,13 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        public ManagementController(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ManagementController(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _userService = userService;
             _mapper = mapper;
+            _userManager = userManager;
         }
         #region Company Related work Here
         [Route("/Admin/Companies")]
@@ -128,7 +132,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         //Summary:
         // Here we will update the company by both Admin and Company
         [Route("/UpdateCompany")]
-        [HttpPatch]
+        [HttpPut]
         public IActionResult UpdateCompany([FromBody] CompanyDTO companyDTO)
         {
             if (companyDTO == null || !ModelState.IsValid)
@@ -136,9 +140,11 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                 return BadRequest(ModelState);
             }
             var companyDetail = _mapper.Map<Company>(companyDTO);
-            // check if admin create company
-            // here check if we want to only update company and also its designation person.
-            _unitOfWork._companyRepository.Update(companyDetail);
+            
+            // here check if we want to only update company and also its designation person.........
+            if (!_unitOfWork._companyRepository.Update(companyDetail)) return BadRequest();
+            // first we will get all the employee that alloted designation.......
+            var EmpDesignationExist = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == companyDTO.Id);
             if (companyDTO.CompanyDesigantion != null)
             {
                 for (int i = 0; i < companyDTO.CompanyDesigantion?.Count(); i++)
@@ -158,8 +164,8 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                         {
                             designationId = _unitOfWork._designationRepository.FirstOrDefault(u => u.Name == designation.Name)?.Id ?? 0;
                         }
-
                     }
+                    // 
                     // alloted the desigantion to the company senior employee.
                     AllotedDesignationEmployee allotedDesigEmployee = new AllotedDesignationEmployee()
                     {
@@ -167,18 +173,31 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                         CompanyId = companyDetail.Id, // static company id gave here we will work it later on.
                         DesignationId = designationId == 0 ? designationExist?.Id ?? 0 : designationId
                     };
+                    var GetEmpDesigantionForUpdate = EmpDesignationExist.FirstOrDefault(u => u.DesignationId == designationExist?.Id);
+                    if(GetEmpDesigantionForUpdate!=null)
+                    {
+                        allotedDesigEmployee = GetEmpDesigantionForUpdate;
+                        allotedDesigEmployee.Name = companyDTO.CompanyDesigantion.ElementAt(i).Name?.Trim().ToString() ?? "";
+                        EmpDesignationExist.Remove(GetEmpDesigantionForUpdate);
+                    }
                     if (CreateNewDesignation)
                     {
-                        _unitOfWork._allotedDesignationRepository.Add(allotedDesigEmployee);
+                        if (!_unitOfWork._allotedDesignationRepository.Add(allotedDesigEmployee)) return BadRequest();
                         
                     }
                     else
                     {
-                    _unitOfWork._allotedDesignationRepository.Update(allotedDesigEmployee);
+                        if (!_unitOfWork._allotedDesignationRepository.Update(allotedDesigEmployee)) return BadRequest();
 
                     }
                 }
             }
+            
+                if (EmpDesignationExist != null)
+                {
+                    _unitOfWork._allotedDesignationRepository.RemoveRange(EmpDesignationExist);
+                }
+            
             return Ok(new { Status = 1, Message = "Updated Successfully" });
         }
 
@@ -188,23 +207,55 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         // here we will delete the company
         [Route("/DeleteCompany/{CmpId}")]
         [HttpDelete]
-        public IActionResult DeleteCompany(int CmpId)
+        public async  Task<IActionResult> DeleteCompany(int CmpId)
         {
             if (CmpId == 0) return BadRequest();
            
             // find the company
             var companyExist = _unitOfWork._companyRepository.FirstOrDefault(u=>u.Id== CmpId);
             if (companyExist == null) return NotFound();
-            if (!_unitOfWork._companyRepository.Delete(companyExist))
+
+            // then delete the employee of that company
+            var deleteComEmployee = _unitOfWork._employeeRepository.GetAll(u => u.CompanyId == companyExist.Id);
+            if (deleteComEmployee != null)
             {
-            return StatusCode(StatusCodes.Status500InternalServerError);
+                _unitOfWork._employeeRepository.RemoveRange(deleteComEmployee);
             }
+            // delete company employee from the application user table
+           for(int i=0;i<deleteComEmployee?.Count;i++)
+            {
+                var findInApplicationUser = await _userManager.FindByIdAsync(deleteComEmployee.ElementAt(i).ApplicationUserId);
+                if (findInApplicationUser == null) return BadRequest();
+                // remove applicationuser sae employee 
+                if (!_userManager.DeleteAsync(findInApplicationUser).Result.Succeeded)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+            }
+
             // find the employee designation of that company and delete it from the database
-            var getEmpAllotedDesignation = _unitOfWork._allotedDesignationRepository.GetAll(u=>u.CompanyId == CmpId);
+            var getEmpAllotedDesignation = _unitOfWork._allotedDesignationRepository.GetAll(u=>u.CompanyId == companyExist.Id);
             if (getEmpAllotedDesignation != null)
             {
                 _unitOfWork._allotedDesignationRepository.RemoveRange(getEmpAllotedDesignation);
             }
+
+            // here finally we delete company.
+            if (!_unitOfWork._companyRepository.Delete(companyExist))
+            {
+            return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            // next we will delete company user it from application user.
+            var findCompInApplicationUser = await _userManager.FindByIdAsync(companyExist.ApplicationUserId);
+            if(findCompInApplicationUser == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            if (! _userManager.DeleteAsync(findCompInApplicationUser).Result.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
             return Ok(new { Status = 1, Message = "Deleted Successfully" });
         }
 
@@ -220,10 +271,14 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             return Ok(new { Status = 1, Data = EmpExistCompany });
         }
 
-
-
-
-
+        // Summary: get the company detail
+        [Route("Company")]
+        [HttpGet]
+        public IActionResult getCompany()
+        {
+            // through claim we will get the company id and find the company in the database using this id and then we will return the company detail
+            return Ok();
+        }
 
 
         #endregion
