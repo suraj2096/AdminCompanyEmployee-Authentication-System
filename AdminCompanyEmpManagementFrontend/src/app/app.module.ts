@@ -7,7 +7,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpHandler, HttpHeaderResponse } from '@angular/common/http';
 import { CompanyComponent } from './company/company.component';
 import { EmployeeComponent } from './employee/employee.component';
 import { DataTableDirective, DataTablesModule } from 'angular-datatables';
@@ -30,6 +30,7 @@ import { EmployeeListComponent } from './employee-list/employee-list.component';
     HttpClientModule,
     DataTablesModule,
     FormsModule,
+    
 
   ],
   providers: [],

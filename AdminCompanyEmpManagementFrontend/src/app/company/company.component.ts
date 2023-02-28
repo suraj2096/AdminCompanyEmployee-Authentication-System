@@ -68,9 +68,20 @@ dtTrigger:Subject<any> = new Subject<any>();
 
       // get company
          getCompany(){
-
-         }
-
+          this.companyService.getSpecificCompany().subscribe(
+            (data)=>{
+                this.GetAllCompany = data;
+                console.log(this.GetAllCompany);
+                // initiate owr data table
+                this.dtTrigger.next(null);
+              },
+              (error:any)=>{
+                console.log(error);
+              }
+            
+            )
+          }
+         
 
 
 

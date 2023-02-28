@@ -73,3 +73,6 @@ D:\officeWork Folder\AdminCompanyEmpAssignment\AdminCompanyEmpManagementSystem\o
 D:\officeWork Folder\AdminCompanyEmpAssignment\AdminCompanyEmpManagementSystem\bin\Debug\net6.0\AutoMapper.dll
 D:\officeWork Folder\AdminCompanyEmpAssignment\AdminCompanyEmpManagementSystem\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 D:\officeWork Folder\AdminCompanyEmpAssignment\AdminCompanyEmpManagementSystem\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\officeWork Folder\AdminCompanyEmpAssignment\AdminCompanyEmpManagementSystem\bin\Debug\net6.0\AdminCompanyEmpManagementSystem.staticwebassets.runtime.json
+D:\officeWork Folder\AdminCompanyEmpAssignment\AdminCompanyEmpManagementSystem\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.UI.dll
+D:\officeWork Folder\AdminCompanyEmpAssignment\AdminCompanyEmpManagementSystem\bin\Debug\net6.0\Microsoft.Extensions.FileProviders.Embedded.dll

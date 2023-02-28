@@ -4,10 +4,14 @@ using AdminCompanyEmpManagementSystem.Models.DTOs;
 using AdminCompanyEmpManagementSystem.Repository.IRepository;
 using AdminCompanyEmpManagementSystem.Services.IServices;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 
 namespace AdminCompanyEmpManagementSystem.Controllers
 {
@@ -19,12 +23,14 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
-        public ManagementController(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper, UserManager<ApplicationUser> userManager)
+        private readonly IEmailSender _emailSender;
+        public ManagementController(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper, UserManager<ApplicationUser> userManager,IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
             _userService = userService;
             _mapper = mapper;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
         #region Company Related work Here
         [Route("/Admin/Companies")]
@@ -81,14 +87,20 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             }
             var companyDetail = _mapper.Map<Company>(companyDTO);
             // check if admin register the company then we first create the company register and login ceredentials
+            var passwordGen = "";
             ApplicationUser user = new ApplicationUser()
             {
                 UserName = companyDTO.Email,
                 PasswordHash = _userService.GeneratePassword(),
                 Role = SD.Role_Company
             };
+            passwordGen = user.PasswordHash;
             var registerCompany = await _userService.RegisterUser(user);
             companyDetail.ApplicationUserId = user.Id;
+            if(_unitOfWork._companyRepository.FirstOrDefault(u=>u.GstNum == companyDetail.GstNum) != null)
+            {
+                return BadRequest(ModelState); 
+            }
             if (!_unitOfWork._companyRepository.Add(companyDetail))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
@@ -125,6 +137,9 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                 };
                 _unitOfWork._allotedDesignationRepository.Add(allotedDesigEmployee);
             }
+            // here we will send the email and in email we will send the ceredentials to the user
+            _emailSender?.SendEmailAsync(user.UserName, "login Ceredentials",
+                $"Your userId is {user.UserName} and password is {passwordGen}.");
             return Ok(new { Success = 1, Message = "Company Created Successfuly" });
         }
 
@@ -272,12 +287,47 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         }
 
         // Summary: get the company detail
-        [Route("Company")]
+        [Authorize]
+        [Route("GetCompanyData")]
         [HttpGet]
-        public IActionResult getCompany()
+        public async Task<IActionResult> getCompany()
         {
             // through claim we will get the company id and find the company in the database using this id and then we will return the company detail
-            return Ok();
+            // through jwt token we will get the company id
+            var claimIdentity = User.Identity as ClaimsIdentity;
+            var claimUser = claimIdentity?.FindFirst(ClaimTypes.Name)?.Value??null;
+            if (claimUser == null) return NotFound();
+            var applicationUser = await _userManager.FindByIdAsync(claimUser);
+            if(applicationUser == null) return NotFound();
+            // then we will find the company 
+            List<CompanyDTO> companyDetail = new List<CompanyDTO>();
+           var getCompany = _unitOfWork._companyRepository?.FirstOrDefault(filter: u => u.ApplicationUserId == applicationUser.Id);
+            if(getCompany==null) return NotFound();
+                CompanyDTO company = new CompanyDTO()
+                {
+                    CompanyDesigantion = new List<CompanyDesignationDTO>()
+                };
+                var getAllDesEmp = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == getCompany.Id, includeTables: "Designation");
+                company.Id = getCompany.Id;
+                company.Name = getCompany.Name;
+                company.Address = getCompany.Address;
+                company.GstNum = getCompany.GstNum;
+                company.ApplicationUserId = getCompany.ApplicationUserId;
+                var companyDesigantion = new List<CompanyDesignationDTO>();
+                foreach (var dataDesigantion in getAllDesEmp)
+                {
+                    var companyDesigantionDTO = new CompanyDesignationDTO()
+                    {
+                        Name = dataDesigantion.Name,
+                        DesignationType = dataDesigantion.Designation.Name
+                    };
+                    companyDesigantion.Add(companyDesigantionDTO);
+                }
+                company.CompanyDesigantion.AddRange(companyDesigantion);
+
+                 companyDetail.Add(company);
+            
+            return Ok(companyDetail);
         }
 
 

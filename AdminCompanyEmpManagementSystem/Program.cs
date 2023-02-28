@@ -7,6 +7,7 @@ using AdminCompanyEmpManagementSystem.Services;
 using AdminCompanyEmpManagementSystem.Services.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +33,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtManager, JwtManager>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 // adding jwt configuration
 
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 var appsettingSection = builder.Configuration.GetSection("AppSettingJWT");
 // here we will register the AppSettingJWT instance.
 builder.Services.Configure<AppSettingJwt>(appsettingSection);
+builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSettings"));
 // here we will get the AppSettingJWT section that is in appsettingSection
 var appsetting = appsettingSection.Get<AppSettingJwt>();
 // here we will convert the secretKey to bytes and stroe in key.
