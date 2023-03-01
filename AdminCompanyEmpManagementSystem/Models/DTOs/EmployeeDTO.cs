@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 namespace AdminCompanyEmpManagementSystem.Models.DTOs
 {
     
-    public class EmployeeDTO 
+    public class EmployeeDTO:IDisposable 
     {
         public int Id { get; set; }
         [Required]
@@ -14,6 +14,7 @@ namespace AdminCompanyEmpManagementSystem.Models.DTOs
 
         [Required]
         public int Salary { get; set; }
+        public string Email { get; set; }
         [Required]
         public string Address { get; set; }
         public string PanNum { get; set; }
@@ -24,5 +25,12 @@ namespace AdminCompanyEmpManagementSystem.Models.DTOs
         [Required]
         public string PhoneNum { get; set; }
         public int CompanyId { get; set; }
+        public string? ApplicationUserId { get; set; }
+        public string? companyName { get; set; }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

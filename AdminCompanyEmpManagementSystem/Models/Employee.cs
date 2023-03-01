@@ -11,6 +11,7 @@ namespace AdminCompanyEmpManagementSystem.Models
 
         [Required]
         public int Salary { get; set; }
+        public string Email { get; set; }
         [Required]
         public string Address { get; set; }
         public string PanNum { get; set; }

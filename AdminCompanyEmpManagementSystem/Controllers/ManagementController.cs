@@ -35,7 +35,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         #region Company Related work Here
         [Route("/Admin/Companies")]
         [HttpGet]
-        public IActionResult GetAllCompnay()
+        public async Task<IActionResult> GetAllCompnay()
         {
             // return Ok(_unitOfWork._companyRepository.GetAll());
             List<CompanyDTO> companyDesigantionDto = new List<CompanyDTO>();
@@ -48,8 +48,11 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                     CompanyDesigantion = new List<CompanyDesignationDTO>()
                 };
                 var getAllDesEmp = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == getAllCompany.ElementAt(i).Id, includeTables: "Designation");
+                var user = await _userManager.FindByIdAsync(getAllCompany.ElementAt(i).ApplicationUserId);
                 company.Id = getAllCompany.ElementAt(i).Id;
                 company.Name = getAllCompany.ElementAt(i).Name;
+                company.Email = user.UserName;
+                company.Email = getAllCompany.ElementAt(i).ApplicationUser.UserName;
                 company.Address = getAllCompany.ElementAt(i).Address;
                 company.GstNum = getAllCompany.ElementAt(i).GstNum;
                 company.ApplicationUserId = getAllCompany.ElementAt(i).ApplicationUserId;
@@ -309,6 +312,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                 };
                 var getAllDesEmp = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == getCompany.Id, includeTables: "Designation");
                 company.Id = getCompany.Id;
+            company.Email = applicationUser.UserName;
                 company.Name = getCompany.Name;
                 company.Address = getCompany.Address;
                 company.GstNum = getCompany.GstNum;
