@@ -10,4 +10,5 @@ export class Employee {
     PFNum:any; 
     PhoneNum :any;
     CompanyId:any;
+    // companyName:any;
 }

@@ -115,7 +115,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             // company user.
             _unitOfWork._companyRepository.Add(companyDetail);*/
            //------------------------------
-            for (int i = 0; i < companyDTO.CompanyDesigantion?.Count(); i++)
+           /* for (int i = 0; i < companyDTO.CompanyDesigantion?.Count(); i++)
             {
                 var designationExist = _unitOfWork._designationRepository.FirstOrDefault(filter: u => u.Name == companyDTO.CompanyDesigantion.ElementAt(i).DesignationType);
                 var designationId = 0;
@@ -139,11 +139,11 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                     DesignationId = designationId == 0 ? designationExist?.Id ?? 0 : designationId
                 };
                 _unitOfWork._allotedDesignationRepository.Add(allotedDesigEmployee);
-            }
+            }*/
             // here we will send the email and in email we will send the ceredentials to the user
-            _emailSender?.SendEmailAsync(user.UserName, "login Ceredentials",
-                $"Your userId is {user.UserName} and password is {passwordGen}.");
-            return Ok(new { Success = 1, Message = "Company Created Successfuly" });
+            /*_emailSender?.SendEmailAsync(user.UserName, "login Ceredentials",
+                $"Your userId is {user.UserName} and password is {passwordGen}.");*/
+            return Ok(new { Success = 1, Message = "Company Created Successfuly", data = new { user = user.UserName, password = passwordGen } });
         }
 
 
@@ -162,7 +162,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             // here check if we want to only update company and also its designation person.........
             if (!_unitOfWork._companyRepository.Update(companyDetail)) return BadRequest();
             // first we will get all the employee that alloted designation.......
-            var EmpDesignationExist = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == companyDTO.Id);
+            /*var EmpDesignationExist = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == companyDTO.Id);
             if (companyDTO.CompanyDesigantion != null)
             {
                 for (int i = 0; i < companyDTO.CompanyDesigantion?.Count(); i++)
@@ -214,7 +214,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                 if (EmpDesignationExist != null)
                 {
                     _unitOfWork._allotedDesignationRepository.RemoveRange(EmpDesignationExist);
-                }
+                }*/
             
             return Ok(new { Status = 1, Message = "Updated Successfully" });
         }

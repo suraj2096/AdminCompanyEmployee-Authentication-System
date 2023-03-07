@@ -20,6 +20,7 @@ export class EmployeeService {
           return this.httpClient.post("https://localhost:7294/api/Employee",employeeData);
   }
   updateEmployee(employeeData:Employee):Observable<any>{
+    debugger
     return this.httpClient.put("https://localhost:7294/api/Employee",employeeData);
   }
   deleteEmployee(id:any):Observable<any>{

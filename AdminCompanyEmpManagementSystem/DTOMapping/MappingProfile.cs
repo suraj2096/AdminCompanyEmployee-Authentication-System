@@ -12,6 +12,7 @@ namespace AdminCompanyEmpManagementSystem.DTOMapping
             CreateMap<UserRegisterDTO, ApplicationUser>().ReverseMap();
             CreateMap<CompanyDTO, Company>().ReverseMap();
             CreateMap<EmployeeDTO, Employee>().ReverseMap();
+            CreateMap<LeaveDTO,Leaves>().ReverseMap();
         }
     }
 }

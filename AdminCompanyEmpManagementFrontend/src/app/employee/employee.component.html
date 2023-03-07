@@ -38,7 +38,7 @@
        <td>{{empList.pfNum}}</td>
        <td class="text-center">
         <button class="btn btn-info ms-2" (click)="EditButtonSetData(empList)" data-bs-toggle="modal" data-bs-target="#UpdateEmployee" >Edit</button>
-        <button class="btn btn-danger ms-2" >Leave</button>
+        <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#leaveDialogue" >Leave</button>
        </td>
       </tr>
    </tbody>
@@ -152,6 +152,104 @@
         <div class="modal-footer">
           <button type="button"   class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary"  (click)="EditEmployee(myForm)">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Create leave Model -->
+  <div class="modal" tabindex="-1" id="leaveDialogue">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header col-12">
+          <div class="col-3">
+          <h5 class="modal-title">Take Leave</h5>
+        </div>
+          <div class="col-7">
+          <button class="float-end btn btn-info" (click)="leaveDetail()" data-bs-toggle="modal" data-bs-target="#leaveHistory">Leave history</button>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div>
+            <form #myForm="ngForm">
+              <div class="row mt-2">
+                 <div class="col-4"> 
+             <label>Reason</label>
+                 </div>
+                 <div class="col-8">
+                  <input type="text" name="Reason" [(ngModel)]="LeaveData.Reason" placeholder="Enter your Reason" class="form-control" required/>
+                 </div>
+              </div>
+
+
+              <div class="row mt-2">
+                <div class="col-4"> 
+            <label>Start Date</label>
+                </div>
+                <div class="col-8">
+                 <input type="date" name="StartDate" [(ngModel)]="LeaveData.StartDate"  class="form-control" required />
+                </div>
+             </div>
+
+             <div class="row mt-2">
+              <div class="col-4"> 
+          <label>End Date</label>
+              </div>
+              <div class="col-8">
+               <input type="date" name="EndDate" [(ngModel)]="LeaveData.EndDate" class="form-control" required />
+              </div>
+           </div>
+
+
+
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button  type="button" class="btn btn-primary" (click)="saveLeave()">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- list leave modal -->
+  <div class="modal " tabindex="-1" id="leaveHistory">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Leave History</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div>
+            <table class="table table-bordered table-strike">
+              <thead>
+              <tr>
+                <th>Reason</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let leaveList of LeaveList">
+                  <td>{{leaveList.reason}}</td>
+                  
+                  <td>{{leaveList.startDate}}</td>
+                  <td>{{leaveList.endDate}}</td>
+                  <td *ngIf="leaveList.status == 1" class="bg-success text-center text-white">Approved</td>
+                  <td *ngIf="leaveList.status == 2" class="bg-warning text-center text-white">Pending</td>
+                  <td *ngIf="leaveList.status == 3" class="bg-danger text-center text-white">Rejected</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>

@@ -75,9 +75,9 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             EmployeeDetail.ApplicationUserId = user.Id;
             if (!_unitOfWork._employeeRepository.Add(EmployeeDetail))return Ok(new { Success = 0, Message = "Employee not created" });
             // send the login ceredentials of employee through email
-            _emailSender?.SendEmailAsync(user.UserName, "login Ceredentials",
-               $"Your userId is {user.UserName} and password is {passwordGen}.");
-            return Ok(new { Success = 1, Message = "Created Successfully the Employee" });
+            /*_emailSender?.SendEmailAsync(user.UserName, "login Ceredentials",
+               $"Your userId is {user.UserName} and password is {passwordGen}.");*/
+            return Ok(new { Success = 1, Message = "Created Successfully the Employee", data = new { user = user.UserName, password = passwordGen } });
         }
         [NonAction]
         public bool CheckEmployeeExist(Employee employeeDetail,Employee getEmployee)

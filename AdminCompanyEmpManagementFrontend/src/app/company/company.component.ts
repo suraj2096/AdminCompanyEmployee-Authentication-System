@@ -148,6 +148,7 @@ dtTrigger:Subject<any> = new Subject<any>();
           
           this.companyService.createCompany(this.CreateCompany).subscribe({
             next:(data)=>{
+              alert(`userName:${data.data.user} and password is ${data.data.password}`);
             },
             error:(err)=>{
               console.log(err);

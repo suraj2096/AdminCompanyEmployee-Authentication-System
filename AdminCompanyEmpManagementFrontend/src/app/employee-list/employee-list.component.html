@@ -3,10 +3,13 @@
       <div class="col-1 ms-1">
      <button class="btn btn-danger text-white" (click)="BackToList()">Back</button>
       </div>
-    <div class="col-5">
+    <div class="col-4">
       <h2 class="">Employee List</h2>
     </div>
-    <div class="col-4 ">
+    <div class="col-5 ">
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createDesignation">Add Designation</button>
+      <button class="btn btn-info ms-2" (click)="showDesignation()" data-bs-toggle="modal" data-bs-target="#Designation" >Designation List</button>
+      <button class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#leavedisplayOptions" >Leave List</button>
         <button class="btn btn-info float-end" data-bs-toggle="modal" data-bs-target="#CreateEmployee" (click)="addEmployee()">+ New Employee</button>
     </div>
 </div>
@@ -56,7 +59,7 @@
       <div class="modal-header bg-success">
         <h5 class="modal-title text-white" *ngIf="saveUpdatButton==false">Create Employee</h5>
         <h5 class="modal-title text-white" *ngIf="saveUpdatButton">Update Employee</h5>
-        <button type="button"  class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button"  class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="resetValue()"></button>
       </div>
       <div class="modal-body">
         <div *ngIf="EmployeeErrorExist">
@@ -78,10 +81,22 @@
         <label>Salary</label>
           </div>
           <div class="col-8">
-          <input type="text" [(ngModel)]="CreateEmployee.Salary" #Salary="ngModel"  name="text" placeholder="Enter Salary" class="form-control" required/>
+          <input type="text" [(ngModel)]="CreateEmployee.Salary" #Salary="ngModel"  name="Salary" placeholder="Enter Salary" class="form-control" required/>
           <p *ngIf="Salary.invalid && (Salary.dirty || Salary.touched)" class="text-danger m-0 p-0">Salary is required</p>  
         </div>
          </div>
+
+         <div class="row pt-3">
+          <div class="col-3 offset-1">
+        <label>Email</label>
+          </div>
+          <div class="col-8">
+          <input type="email" [(ngModel)]="CreateEmployee.Email" #Email="ngModel"  name="Email" placeholder="Enter Email" class="form-control" required/>
+          <p *ngIf="Email.invalid && (Email.dirty || Email.touched)" class="text-danger m-0 p-0">Salary is required</p>  
+        </div>
+         </div>
+
+
          <div class="row mt-3">
           <div class="col-3 offset-1">
         <label>Address</label>
@@ -96,10 +111,12 @@
           <div class="col-3 offset-1">
         <label>Pan Number</label>
           </div>
-          <div class="col-8">
-            <input type="text"  [(ngModel)]="CreateEmployee.PanNum" #PanNum="ngModel" name="Pan Number" title="you cannot enter the pan number " class="form-control" required/>
+          <div class="col-8" *ngIf="!saveUpdatButton">
+            <input type="text"  [(ngModel)]="CreateEmployee.PanNum" #PanNum="ngModel" name="Pan Number" placeholder="Enter Pan Card Number" class="form-control" required/>
             <p *ngIf="PanNum.invalid && (PanNum.dirty || PanNum.touched)" class="text-danger m-0 p-0" >Pan Number is required</p>  
-            <!-- <input *ngIf="saveUpdatButton" type="text" disabled [value]="CreateEmployee.PanNum" name="Pan Number" title="you cannot enter the pan number " class="form-control" /> -->
+          </div>
+          <div class="col-8" *ngIf="saveUpdatButton">
+            <input  type="text" disabled [value]="CreateEmployee.PanNum" name="Pan Number" title="you cannot enter the pan number " class="form-control" />
           </div>
          </div>
 
@@ -143,9 +160,166 @@
       </div>
       <div class="modal-footer">
         <button type="button"   class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="SaveEmployee(myForm)" *ngIf="saveUpdatButton==false" data-bs-dismiss="modal">Save changes</button>
+        <button type="button" class="btn btn-primary" (click)="SaveEmployee(myForm)" *ngIf="saveUpdatButton==false" >Save changes</button>
         <button type="button" class="btn btn-primary" (click)="EditEmployee(myForm)" *ngIf="saveUpdatButton">Update</button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Add designation model -->
+
+<div class="modal" tabindex="-1" id="createDesignation">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add OR Update Designation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+ 
+          <div class="row mt-3">
+            <div class="col-3 offset-1">
+          <label>Designation</label>
+            </div>
+            <div class="col-8 ">
+            <button class="btn btn-success ms-5" type="button" (click)="AddMoreDesignation()">+ Add / Update Designation</button>
+            </div>
+            </div>
+            <div id="desigantionParent">
+            <div *ngFor="let designationget of CreateCompanyDesignation;let indexOfElement=index;" class="row mt-2 ms-2">
+            <div class="row">
+              <div class="col-4">
+                <input type="text"  name="value{{CreateCompanyDesignation[indexOfElement].DesType}}" [(ngModel)]="CreateCompanyDesignation[indexOfElement].DesType"  placeholder="Designation" class="form-control"/>
+              </div>
+              <div class="col-8">
+                <!-- <input type="text"  name="value{{CreateCompanyDesignation[indexOfElement].Name}}" [(ngModel)]="CreateCompanyDesignation[indexOfElement].Name"  placeholder="Name" class="form-control"/> -->
+              <select class="form-control" (change)="onChangeEmployeeName($event)">
+                <option selected disabled>Select Employee</option>
+                <option *ngFor="let emplist of empList" [id]="emplist.id">{{emplist.name}}</option>
+              </select>
+              </div>
+              <!-- <div class="col-1">
+               <button class="btn btn-danger" (click)="RemoveDesignation(indexOfElement)" >Remove</button>
+              </div> -->
+            </div>
+            <div class="col-12">
+             <p class="text-danger" *ngIf='designationget.Validate!=""' >{{designationget.Validate}}</p>
+            </div>
+            </div>
+            </div>
+
+
+
+        <!-- </div> -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="saveDesignation()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- here in this model we will display the company designation people -->
+<div class="modal " tabindex="-1" id="Designation">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success ">
+        <h5 class="modal-title  text-white">Company Designated Employee</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body ms-3">
+       <table class="table table-hover table-bordered">
+        <thead class="table-success">
+           <tr>
+            <th>Designation Type</th>
+            <th>Name</th>
+            <th>Action</th>
+           </tr>
+        </thead>
+        <tbody class="table-info">
+            <tr *ngFor="let designation of GetCompanyDesignation">
+               <td>{{designation.designation.name}}</td>
+               <td>{{designation.name}}</td>
+               <td><button class="btn btn-danger" (click)="removeDesignation(designation)" data-bs-dismiss="modal"> Remove</button></td>
+            </tr>
+        </tbody>
+       </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button"  class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!--  leave list  -->
+<div class="modal" tabindex="-1" id="leavedisplayOptions">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Leave Display Options</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <button class="btn btn-info" (click)="getPendingLeaves()" data-bs-toggle="modal" data-bs-target="#particluarLeaveDisplay">Pending Leaves</button>
+        <button class="btn btn-success ms-2" (click)="getApprovedLeaves()" data-bs-toggle="modal" data-bs-target="#particluarLeaveDisplay">Approved Leaves</button>
+        <button class="btn btn-danger ms-2" (click)="getRejectedLeaves()" data-bs-toggle="modal" data-bs-target="#particluarLeaveDisplay">Rejected Leaves</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- peding leave modal -->
+<div class="modal" tabindex="-1" id="particluarLeaveDisplay">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{disLeaveListHead}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-sticky table-hover table-striped">
+          <thead class="table-success">
+             <tr>
+              <th>Employee Name</th>
+              <th>Reason</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th *ngIf="disRejAppButton">Action</th>
+             </tr>
+          </thead>
+          <tbody class="table-info">
+            <tr *ngIf="LeaveList.length == 0" class="text-center ">No Record Available</tr>
+              <tr *ngFor="let leaveList of LeaveList">
+              <td>{{leaveList.employee.name}}</td>
+              <td>{{leaveList.reason}}</td>
+              <td>{{leaveList.startDate}}</td>
+              <td>{{leaveList.endDate}}</td>
+              <td *ngIf="disRejAppButton">
+                <button class="btn btn-danger" (click)="leaveRejected(leaveList.empId)">Rejected</button>
+                <button class=" ms-2 btn btn-success" (click)="leaveApproved(leaveList.empId)">Approved</button>
+              </td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+ 

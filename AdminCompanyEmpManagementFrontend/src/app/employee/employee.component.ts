@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Employee } from '../Models/employee';
+import { Leave } from '../Models/leave';
 import { EmployeeService } from '../Services/employee.service';
+import { LeaveService } from '../Services/leave.service';
 
 declare var window: any;
 @Component({
@@ -9,10 +11,12 @@ declare var window: any;
   styleUrls: ['./employee.component.scss']
 })
 export class EmployeeComponent implements OnInit{
- constructor(private employeeService:EmployeeService){}
+ constructor(private employeeService:EmployeeService,private leaveService:LeaveService){}
  employeeDetail :any=[];
  UpdateEmployee:any;
  formModal:any;
+ LeaveData:any;
+ LeaveList:any[]=[];
 //  EmployeeErrorExist:boolean = false;
   ngOnInit(): void {
   this.getEmployee();
@@ -20,6 +24,7 @@ export class EmployeeComponent implements OnInit{
   this.formModal = new window.bootstrap.Modal(
     document.getElementById('UpdateEmployee')
   );
+  this.LeaveData = new Leave();
   }
   getEmployee(){
     this.employeeService.getEmployee().subscribe({
@@ -77,6 +82,40 @@ export class EmployeeComponent implements OnInit{
         this.formModal.hide();
       }
     });
+  }
+
+  saveLeave(){
+    debugger
+    if(this.LeaveData.Reason == undefined || this.LeaveData.StartDate == undefined || this.LeaveData.EndDate== undefined){
+      return;
+    }
+    
+    this.LeaveData.EmpId = this.employeeDetail[0].id;
+    this.LeaveData.Status = 2; // here leave will by default pending
+    this.leaveService.createLeave(this.LeaveData).subscribe({
+      next:(data:any)=>{
+            alert(data.message);
+      },
+      error:(err)=>{
+           console.log(err);
+      }
+    })
+  }
+
+  leaveDetail(){
+    this.leaveService.getLeave(this.employeeDetail[0].id).subscribe({
+      next:(data)=>{
+           this.LeaveList = data.data;
+            this.LeaveList = this.LeaveList.filter((item)=>{
+                item.startDate = new Date(item.startDate).toDateString();
+                item.endDate = new Date(item.endDate).toDateString();
+                return item;
+            })
+      },
+      error:(err)=>{
+       console.log(err);
+      }
+    })
   }
 
 }
