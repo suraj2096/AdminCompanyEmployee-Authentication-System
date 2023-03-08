@@ -24,7 +24,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
-        public ManagementController(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper, UserManager<ApplicationUser> userManager,IEmailSender emailSender)
+        public ManagementController(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
             _userService = userService;
@@ -32,16 +32,33 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             _userManager = userManager;
             _emailSender = emailSender;
         }
+
+
         #region Company Related work Here
+        [Authorize(Roles = SD.Role_Admin)]
         [Route("/Admin/Companies")]
         [HttpGet]
         public async Task<IActionResult> GetAllCompnay()
         {
-            // return Ok(_unitOfWork._companyRepository.GetAll());
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin)
+                return BadRequest();
+
+
+
+
+
+            /* if(_userService.CheckUserInDb())*/
             List<CompanyDTO> companyDesigantionDto = new List<CompanyDTO>();
             var getAllCompany = _unitOfWork._companyRepository.GetAll();
-           
-            for(int i=0;i<getAllCompany.Count;i++)
+
+            for (int i = 0; i < getAllCompany.Count; i++)
             {
                 CompanyDTO company = new CompanyDTO()
                 {
@@ -57,9 +74,9 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                 company.GstNum = getAllCompany.ElementAt(i).GstNum;
                 company.ApplicationUserId = getAllCompany.ElementAt(i).ApplicationUserId;
                 var companyDesigantion = new List<CompanyDesignationDTO>();
-                foreach(var dataDesigantion in getAllDesEmp)
+                foreach (var dataDesigantion in getAllDesEmp)
                 {
-                    var companyDesigantionDTO = new  CompanyDesignationDTO()
+                    var companyDesigantionDTO = new CompanyDesignationDTO()
                     {
                         Name = dataDesigantion.Name,
                         DesignationType = dataDesigantion.Designation.Name
@@ -78,11 +95,26 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         /* In the Below Route /CreateCompany Here admin will create company and company will also create himself.
          and here we will create designation dynamically.
          */
+        [Authorize(Roles = SD.Role_Admin)]
         [Route("/CreateCompany")]
         [HttpPost]
 
         public async Task<IActionResult> CreateCompany([FromBody] CompanyDTO companyDTO)
         {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin)
+                return BadRequest();
+
+
+
+
+
             //Patch:
             // Here some changes will done for application user so we will modify it later 
             if (companyDTO == null || !ModelState.IsValid) {
@@ -100,46 +132,14 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             passwordGen = user.PasswordHash;
             var registerCompany = await _userService.RegisterUser(user);
             companyDetail.ApplicationUserId = user.Id;
-            if(_unitOfWork._companyRepository.FirstOrDefault(u=>u.GstNum == companyDetail.GstNum) != null)
+            if (_unitOfWork._companyRepository.FirstOrDefault(u => u.GstNum == companyDetail.GstNum) != null)
             {
-                return BadRequest(ModelState); 
+                return BadRequest(ModelState);
             }
             if (!_unitOfWork._companyRepository.Add(companyDetail))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            //---------------------
-            // this code is not required
-           /* // create company here .
-            // and also check that if company register in asp.net user then we will here update his details by 
-            // company user.
-            _unitOfWork._companyRepository.Add(companyDetail);*/
-           //------------------------------
-           /* for (int i = 0; i < companyDTO.CompanyDesigantion?.Count(); i++)
-            {
-                var designationExist = _unitOfWork._designationRepository.FirstOrDefault(filter: u => u.Name == companyDTO.CompanyDesigantion.ElementAt(i).DesignationType);
-                var designationId = 0;
-                if (designationExist == null)
-                {
-                    Designation designation = new Designation()
-                    {
-                        Name = companyDTO.CompanyDesigantion.ElementAt(i).DesignationType?.Trim().ToString() ?? "",
-                    };
-                    var createDesignation = _unitOfWork._designationRepository.Add(designation);
-                    if (createDesignation)
-                    {
-                        designationId = _unitOfWork._designationRepository.FirstOrDefault(u => u.Name == designation.Name)?.Id ?? 0;
-                    }
-                }
-                // alloted the desigantion to the company senior employee.
-                AllotedDesignationEmployee allotedDesigEmployee = new AllotedDesignationEmployee()
-                {
-                    Name = companyDTO.CompanyDesigantion.ElementAt(i).Name?.Trim().ToString() ?? "",
-                    CompanyId = companyDetail.Id, // static company id gave here we will work it later on.
-                    DesignationId = designationId == 0 ? designationExist?.Id ?? 0 : designationId
-                };
-                _unitOfWork._allotedDesignationRepository.Add(allotedDesigEmployee);
-            }*/
             // here we will send the email and in email we will send the ceredentials to the user
             /*_emailSender?.SendEmailAsync(user.UserName, "login Ceredentials",
                 $"Your userId is {user.UserName} and password is {passwordGen}.");*/
@@ -148,74 +148,33 @@ namespace AdminCompanyEmpManagementSystem.Controllers
 
 
         //Summary:
-        // Here we will update the company by both Admin and Company
+        // Here we will update the company by both Admin and Company 
+        [Authorize(Roles = SD.Role_Admin+","+SD.Role_Company)]
         [Route("/UpdateCompany")]
         [HttpPut]
-        public IActionResult UpdateCompany([FromBody] CompanyDTO companyDTO)
+        public async Task<IActionResult> UpdateCompany([FromBody] CompanyDTO companyDTO)
         {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role!=SD.Role_Company)
+                return BadRequest();
+
+
+
+
             if (companyDTO == null || !ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             var companyDetail = _mapper.Map<Company>(companyDTO);
             
-            // here check if we want to only update company and also its designation person.........
-            if (!_unitOfWork._companyRepository.Update(companyDetail)) return BadRequest();
-            // first we will get all the employee that alloted designation.......
-            /*var EmpDesignationExist = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == companyDTO.Id);
-            if (companyDTO.CompanyDesigantion != null)
-            {
-                for (int i = 0; i < companyDTO.CompanyDesigantion?.Count(); i++)
-                {
-                    var designationExist = _unitOfWork._designationRepository.FirstOrDefault(filter: u => u.Name == companyDTO.CompanyDesigantion.ElementAt(i).DesignationType);
-                    var designationId = 0;
-                    bool CreateNewDesignation = false;
-                    if (designationExist == null)
-                    {
-                        CreateNewDesignation = true;
-                        Designation designation = new Designation()
-                        {
-                            Name = companyDTO.CompanyDesigantion.ElementAt(i).DesignationType?.Trim().ToString() ?? "",
-                        };
-                        var createDesignation = _unitOfWork._designationRepository.Add(designation);
-                        if (createDesignation)
-                        {
-                            designationId = _unitOfWork._designationRepository.FirstOrDefault(u => u.Name == designation.Name)?.Id ?? 0;
-                        }
-                    }
-                    // 
-                    // alloted the desigantion to the company senior employee.
-                    AllotedDesignationEmployee allotedDesigEmployee = new AllotedDesignationEmployee()
-                    {
-                        Name = companyDTO.CompanyDesigantion.ElementAt(i).Name?.Trim().ToString() ?? "",
-                        CompanyId = companyDetail.Id, // static company id gave here we will work it later on.
-                        DesignationId = designationId == 0 ? designationExist?.Id ?? 0 : designationId
-                    };
-                    var GetEmpDesigantionForUpdate = EmpDesignationExist.FirstOrDefault(u => u.DesignationId == designationExist?.Id);
-                    if(GetEmpDesigantionForUpdate!=null)
-                    {
-                        allotedDesigEmployee = GetEmpDesigantionForUpdate;
-                        allotedDesigEmployee.Name = companyDTO.CompanyDesigantion.ElementAt(i).Name?.Trim().ToString() ?? "";
-                        EmpDesignationExist.Remove(GetEmpDesigantionForUpdate);
-                    }
-                    if (CreateNewDesignation)
-                    {
-                        if (!_unitOfWork._allotedDesignationRepository.Add(allotedDesigEmployee)) return BadRequest();
-                        
-                    }
-                    else
-                    {
-                        if (!_unitOfWork._allotedDesignationRepository.Update(allotedDesigEmployee)) return BadRequest();
-
-                    }
-                }
-            }
-            
-                if (EmpDesignationExist != null)
-                {
-                    _unitOfWork._allotedDesignationRepository.RemoveRange(EmpDesignationExist);
-                }*/
-            
+            // here we will update the company ...............
+            if (!_unitOfWork._companyRepository.Update(companyDetail)) return BadRequest(); 
             return Ok(new { Status = 1, Message = "Updated Successfully" });
         }
 
@@ -223,10 +182,28 @@ namespace AdminCompanyEmpManagementSystem.Controllers
 
         //Summary:
         // here we will delete the company
+        [Authorize(Roles =SD.Role_Admin)]
         [Route("/DeleteCompany/{CmpId}")]
         [HttpDelete]
         public async  Task<IActionResult> DeleteCompany(int CmpId)
         {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin)
+                return BadRequest();
+
+
+
+
+
+
+
+
             if (CmpId == 0) return BadRequest();
            
             // find the company
@@ -279,11 +256,23 @@ namespace AdminCompanyEmpManagementSystem.Controllers
 
         // Summary:
         // Get Company all employee
+        [Authorize(Roles = SD.Role_Admin + ","+SD.Role_Company)]
         [Route("Company/Employee/{CmpId}")]
         [HttpGet]
-        public IActionResult GetCompanyEmployee(int CmpId)
+        public async Task<IActionResult> GetCompanyEmployee(int CmpId)
         {
-            if(CmpId == 0) return BadRequest();
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role != SD.Role_Company)
+                return BadRequest();
+
+
+            if (CmpId == 0) return BadRequest();
             var EmpExistCompany = _unitOfWork._employeeRepository.GetAll(u => u.CompanyId == CmpId);
             if (EmpExistCompany == null) return NotFound();
             return Ok(new { Status = 1, Data = EmpExistCompany });
@@ -295,16 +284,22 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> getCompany()
         {
-            // through claim we will get the company id and find the company in the database using this id and then we will return the company detail
-            // through jwt token we will get the company id
-            var claimIdentity = User.Identity as ClaimsIdentity;
-            var claimUser = claimIdentity?.FindFirst(ClaimTypes.Name)?.Value??null;
-            if (claimUser == null) return NotFound();
-            var applicationUser = await _userManager.FindByIdAsync(claimUser);
-            if(applicationUser == null) return NotFound();
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role != SD.Role_Company)
+                return BadRequest();
+
+
+
+            
             // then we will find the company 
             List<CompanyDTO> companyDetail = new List<CompanyDTO>();
-           var getCompany = _unitOfWork._companyRepository?.FirstOrDefault(filter: u => u.ApplicationUserId == applicationUser.Id);
+           var getCompany = _unitOfWork._companyRepository?.FirstOrDefault(filter: u => u.ApplicationUserId == getUserDetailed.Id);
             if(getCompany==null) return NotFound();
                 CompanyDTO company = new CompanyDTO()
                 {
@@ -312,7 +307,7 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                 };
                 var getAllDesEmp = _unitOfWork._allotedDesignationRepository.GetAll(u => u.CompanyId == getCompany.Id, includeTables: "Designation");
                 company.Id = getCompany.Id;
-            company.Email = applicationUser.UserName;
+            company.Email = getUserDetailed.UserName;
                 company.Name = getCompany.Name;
                 company.Address = getCompany.Address;
                 company.GstNum = getCompany.GstNum;

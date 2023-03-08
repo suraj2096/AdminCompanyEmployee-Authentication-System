@@ -34,28 +34,57 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             
             
         }
-        [Authorize]
+        [Authorize(Roles =SD.Role_Employee)]
         [HttpGet]
+
         public async Task<IActionResult> GetEmployee()
         {
-            // through claim we will get the company id and find the company in the database using this id and then we will return the company detail
-            // through jwt token we will get the company id
-            var claimIdentity = User.Identity as ClaimsIdentity;
-            var claimUser = claimIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? null;
-            if (claimUser == null) return NotFound();
-            var applicationUser = await _userManager.FindByIdAsync(claimUser);
-            if (applicationUser == null) return NotFound();
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Employee)
+                return BadRequest();
+
+
+
+           
             List<EmployeeDTO> getEmployeeList = new List<EmployeeDTO>();
-             var getEmployee = _unitOfWork._employeeRepository.FirstOrDefault(u=>u.ApplicationUserId == applicationUser.Id,includeTables:"Company");
+             var getEmployee = _unitOfWork._employeeRepository.FirstOrDefault(u=>u.ApplicationUserId == getUserDetailed.Id,includeTables:"Company");
             if (getEmployee == null) return NotFound();
             getEmployeeList.Add(_mapper.Map<EmployeeDTO>(getEmployee));
             getEmployeeList.ElementAt(0).companyName = getEmployee.Company.Name;
             return Ok(new { Status = 1, Data = getEmployeeList });
         }
+        //Summary:
+        // Here Company and Admin will create the employee
+         
+
+        [Authorize(Roles =SD.Role_Admin + ","+SD.Role_Company)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] EmployeeDTO employeeDTO)
         {
-            var findEmpInOtherCompany = _unitOfWork._employeeRepository.FirstOrDefault(u=>u.AccountNum == employeeDTO.AccountNum || u.PFNum == employeeDTO.PFNum);
+
+
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role != SD.Role_Company)
+                return BadRequest();
+
+
+
+
+
+            var findEmpInOtherCompany = _unitOfWork._employeeRepository.FirstOrDefault(u=>u.AccountNum == employeeDTO.AccountNum 
+            || u.PFNum == employeeDTO.PFNum || u.PhoneNum == employeeDTO.PhoneNum || u.PanNum == employeeDTO.PanNum);
             if (findEmpInOtherCompany != null)
             {
                 return BadRequest(new { Status = -1, Message = "Employee Already Exist in other Company!!!" });
@@ -79,6 +108,10 @@ namespace AdminCompanyEmpManagementSystem.Controllers
                $"Your userId is {user.UserName} and password is {passwordGen}.");*/
             return Ok(new { Success = 1, Message = "Created Successfully the Employee", data = new { user = user.UserName, password = passwordGen } });
         }
+        //Summary:
+        /* here we will check employee already exist in other company or not 
+         */
+
         [NonAction]
         public bool CheckEmployeeExist(Employee employeeDetail,Employee getEmployee)
         {
@@ -111,12 +144,26 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             return false;
             
         }
-                
-        [HttpPut]
-        public IActionResult Update([FromBody] EmployeeDTO employeeDTO)
-        {
 
-             
+        [Authorize(Roles = SD.Role_Admin +","+SD.Role_Company+","+SD.Role_Employee)]
+        [HttpPut]
+        public async  Task<IActionResult> Update([FromBody] EmployeeDTO employeeDTO)
+        {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role != SD.Role_Company 
+                || getUserDetailed.Role != SD.Role_Employee )
+                return BadRequest();
+
+
+
+
+
             if (employeeDTO == null || !ModelState.IsValid) return BadRequest();
             var employeeDetail = _mapper.Map<Employee>(employeeDTO);
 
@@ -129,9 +176,25 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             if (!_unitOfWork._employeeRepository.Update(getEmployee)) return Ok(new { Success = 0, Message = "Employee not Updated" });
             return Ok(new { Success = 1, Message = "Updated Successfully the Employee" });
         }
+
+
+        [Authorize(Roles =SD.Role_Admin+","+SD.Role_Company)]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role != SD.Role_Company)
+                return BadRequest();
+
+
+
+
             if (id == 0) return BadRequest();
             // now find the employee 
             var findEmployee = _unitOfWork._employeeRepository.FirstOrDefault(u => u.Id == id);

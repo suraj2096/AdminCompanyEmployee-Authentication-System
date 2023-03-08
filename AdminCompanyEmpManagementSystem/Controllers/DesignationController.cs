@@ -1,9 +1,13 @@
 ﻿using AdminCompanyEmpManagementSystem.Models;
 using AdminCompanyEmpManagementSystem.Models.DTOs;
 using AdminCompanyEmpManagementSystem.Repository.IRepository;
+using AdminCompanyEmpManagementSystem.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 
 namespace AdminCompanyEmpManagementSystem.Controllers
 {
@@ -12,14 +16,31 @@ namespace AdminCompanyEmpManagementSystem.Controllers
     public class DesignationController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        public DesignationController(IUnitOfWork unitOfWork)
+        private readonly IUserService _userService;
+        public DesignationController(IUnitOfWork unitOfWork,IUserService userService)
         {
             _unitOfWork = unitOfWork;
+            _userService = userService;
         }
 
+        [Authorize(Roles =SD.Role_Admin+","+SD.Role_Company)]
         [HttpGet("{cmpId:int}")]
-        public IActionResult GetDesignation(int cmpId)
+
+
+        public async Task<IActionResult> GetDesignation(int cmpId)
         {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role != SD.Role_Company)
+                return BadRequest();
+
+
+
             if (cmpId == 0) return BadRequest();
             var findCompany = _unitOfWork._companyRepository.FirstOrDefault(u=>u.Id == cmpId);
             if(findCompany == null) return NotFound();
@@ -30,10 +51,24 @@ namespace AdminCompanyEmpManagementSystem.Controllers
         }
 
 
-
+        [Authorize(Roles = SD.Role_Admin +","+SD.Role_Company)]
         [HttpPost]
-        public IActionResult CreateUpdateDesignation([FromBody] List<CompanyDesignationDTO> desigantionList)
+        public async  Task<IActionResult> CreateUpdateDesignation([FromBody] List<CompanyDesignationDTO> desigantionList)
         {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin || getUserDetailed.Role != SD.Role_Company)
+                return BadRequest();
+
+
+
+
+
             foreach (var item in desigantionList)
             {
                 if (item.EmpId == 0) return BadRequest();
@@ -78,9 +113,25 @@ namespace AdminCompanyEmpManagementSystem.Controllers
             }
             return Ok(new { Message = "Designation Updated Successfully" });
         }
+
+
+
+        [Authorize(Roles = SD.Role_Admin +","+SD.Role_Company)]
         [HttpDelete("{id:int}")]
-        public IActionResult RemoveDesigantion(int id)
+        public async Task<IActionResult> RemoveDesigantion(int id)
         {
+            // first we will get the claim and check it is valid user for this work
+            ClaimsIdentity? claimIdentity = User?.Identity as ClaimsIdentity;
+            if (claimIdentity == null) { return BadRequest(); }
+            var claim = claimIdentity.FindFirst(ClaimTypes.Name);
+            if (claim == null) { return BadRequest(); }
+            var getUserDetailed = await _userService.CheckUserInDb(claim.Value);
+            if (getUserDetailed == null) { return BadRequest(); }
+            if (getUserDetailed.Role != SD.Role_Admin)
+                return BadRequest();
+
+
+
             if (id == 0) return BadRequest();
             var findEmpInAlloDes = _unitOfWork._allotedDesignationRepository.FirstOrDefault(u => u.Id == id);
             if (findEmpInAlloDes == null) return NotFound();
